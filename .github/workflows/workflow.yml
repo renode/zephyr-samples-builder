@@ -1,0 +1,142 @@
+name: Build
+on: [push]
+
+env:
+  MATRIX_RUNNERS: 8  # do not saturate runner pool
+  ZEPHYR_SDK_VERSION: "0.16.0"
+  ZEPHYR_VERSION: "3d37cc3da98b127eb9a86beb68a89e3e66a0253a"
+  MICROPYTHON_VERSION: "fe2a8332ff9c7cc7b66ed6da04f5a4a825309818"
+
+jobs:
+
+  Prepare-Workload:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Prepare Zephyr Enviroment
+        run: |
+          # Basic git config to apply patches
+          git config --global user.name 'CI'
+          git config --global user.email '<>'
+
+          # Download dependencies
+          ./scripts/prepare_sources.sh
+
+      - name: Prepare Workload
+        id: set-matrix
+        run: |
+          ./scripts/get_boards_samples_pairs.py -c zephyr.yaml > boards_sample_pairs
+          echo "matrix=`./scripts/generate_matrix.py`" >> $GITHUB_OUTPUT
+          ls -lah
+
+      - name: Cache Environment
+        uses: actions/cache@v3
+        with:
+          key: ${{ runner.os }}-build-${{ github.sha }}
+          path: |
+            zephyrproject/
+            zephyr-sdk/
+            micropython/
+            boards_sample_pairs
+
+  Build:
+    needs: Prepare-Workload
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix: ${{ fromJSON(needs.Prepare-Workload.outputs.matrix) }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          key: ${{ runner.os }}-build-${{ github.sha }}
+          path: |
+            zephyrproject/
+            zephyr-sdk/
+            micropython/
+            boards_sample_pairs
+
+      - name: Prepare build environment
+        run: |
+
+          # Install Zephyr SDK and pipeline dependencies
+          sudo apt -qq update
+          sudo apt -qq install --no-install-recommends git cmake ninja-build gperf \
+          ccache dfu-util device-tree-compiler wget \
+          python3-dev python3-pip python3-setuptools python3-tk python3-wheel xz-utils file \
+          make gcc gcc-multilib g++-multilib libsdl2-dev libmagic1 parallel 
+
+          ls -lah
+
+          # Setup runtime (SDK)
+          cd zephyr-sdk
+          ./setup.sh -t all -h -c
+          export ZEPHYR_SDK_INSTALL_DIR=$(pwd)
+          cd -
+
+          # Setup runtime (west)
+          cd zephyrproject/zephyr
+          pip3 -q install -r scripts/requirements.txt
+          cd ..
+          west zephyr-export
+          cd ..
+
+          # Install build script dependencies
+          pip3 -q install -r requirements.txt
+
+          # Split wokrload between all runners
+          split --numeric-suffixes=1 --suffix-length=3 -n l/${MATRIX_RUNNERS} boards_sample_pairs boards_sample_pairs-
+
+          # List workload
+          ls -l boards_sample_pairs-*
+      
+      - name: Build matrix
+        run: |
+          echo Zephyr Matrix Runner @${{ matrix.runner }} of ${MATRIX_RUNNERS}
+
+          # Assign jobs to a runner
+          WORKLOAD=$(printf "%03d" ${{ matrix.runner }})
+          COUNT=$(wc -l < boards_sample_pairs-${WORKLOAD})
+
+          # Start building
+          parallel -j +0 --keep-order --col-sep " " --halt now,fail=1 ./scripts/build.py --config=zephyr.yaml {} -j {#} -J ${COUNT} :::: boards_sample_pairs-${WORKLOAD}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifacts
+          path: |
+            build
+            boards_sample_pairs
+
+      - name: Transfer build status results
+        uses: actions/upload-artifact@v3
+        with:
+          name: status
+          path: |
+            build/**/*-result.json
+
+  Print-status:
+    needs: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download build status results
+        uses: actions/download-artifact@v3
+        with:
+          name: status
+          path: build/
+
+      - name: Install python dependencies
+        run: |
+          pip3 -q install -r requirements.txt
+
+      - name: Print status
+        run: |
+          ./scripts/generate_summary.py -c zephyr.yaml >> $GITHUB_STEP_SUMMARY
+    

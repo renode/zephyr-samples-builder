@@ -1,0 +1,6 @@
+micropython/
+scripts/__pycache__/
+zephyr-sdk/
+zephyrproject/
+artifacts
+build/

@@ -1,0 +1,46 @@
+project_path: "zephyrproject/zephyr"
+
+artifact_prefix: "build/{board_name}-{sample_name}/"
+artifact_names:
+  build-log:   "{board_name}-{sample_name}-zephyr.log"
+  config:      "{board_name}-{sample_name}-config"
+  dts:         "{board_name}-{sample_name}.dts"
+  elf:         "{board_name}-zephyr-{sample_name}.elf"
+  elf-md5:     "{board_name}-zephyr-{sample_name}.elf.md5"
+  sbom-app:    "{board_name}-{sample_name}-app.spdx"
+  sbom-build:  "{board_name}-{sample_name}-build.spdx"
+  sbom-zephyr: "{board_name}-{sample_name}-zephyr.spdx"
+  zip-sbom:    "{board_name}-{sample_name}-sbom.zip"
+  zip-all:     "{board_name}-{sample_name}-all.zip"
+  result:      "{board_name}-{sample_name}-result.json"
+
+# The path is relative to `zephyr/samples`
+samples:
+  hello_world:
+    path: "hello_world"
+  philosophers:
+    path: "philosophers"
+  shell_module:
+    path: "subsys/shell/shell_module"
+  tensorflow_lite_micro:
+    path: "modules/tflite-micro/hello_world"
+  micropython:
+    path: "../../../micropython/ports/zephyr"
+  blinky:
+    path: "basic/blinky"
+  hello_world_user:
+    path: "userspace/hello_world_user"
+  synchronization:
+    path: "synchronization"
+  lz4:
+    path: "compression/lz4"
+  pi:
+    path: "arch/smp/pi"
+    boards:
+      - "nucleo_l476rg"
+      - "hifive1_revb"
+  system_heap:
+    path: basic/sys_heap
+    boards:
+      - "nucleo_l476rg"
+

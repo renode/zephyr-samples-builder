@@ -1,0 +1,3 @@
+&{{reg_name}} {
+    reg = < {{reg_base}} {{reg_size}} >;
+};

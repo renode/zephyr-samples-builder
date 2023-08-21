@@ -1,0 +1,26 @@
+From eea4d8960f9f2f55cf2c6e61d70d5e2d8e34d231 Mon Sep 17 00:00:00 2001
+From: Filip Kokosinski <fkokosinski@antmicro.com>
+Date: Thu, 2 Mar 2023 13:21:34 +0100
+Subject: [PATCH] ports/zephyr: don't rely on legacy include paths for Zephyr
+
+Signed-off-by: Filip Kokosinski <fkokosinski@antmicro.com>
+---
+ ports/zephyr/mpconfigport_minimal.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ports/zephyr/mpconfigport_minimal.h b/ports/zephyr/mpconfigport_minimal.h
+index e819d5cf4..bb284419f 100644
+--- a/ports/zephyr/mpconfigport_minimal.h
++++ b/ports/zephyr/mpconfigport_minimal.h
+@@ -28,7 +28,7 @@
+ // Include Zephyr's autoconf.h, which should be made first by Zephyr makefiles
+ #include "autoconf.h"
+ // Included here to get basic Zephyr environment (macros, etc.)
+-#include <zephyr.h>
++#include <zephyr/kernel.h>
+ 
+ // Usually passed from Makefile
+ #ifndef MICROPY_HEAP_SIZE
+-- 
+2.39.2
+
