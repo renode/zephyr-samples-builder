@@ -109,14 +109,6 @@ jobs:
           # Start building
           parallel -j +0 --keep-order --col-sep " " --halt now,fail=1 ./scripts/build.py --config=zephyr.yaml {} -j {#} -J ${COUNT} :::: boards_sample_pairs-${WORKLOAD}
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: artifacts
-          path: |
-            build
-            boards_sample_pairs
-
       - name: Transfer build status results
         uses: actions/upload-artifact@v3
         with:
