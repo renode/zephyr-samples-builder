@@ -189,19 +189,22 @@ def main(board_name: str, sample_name: str) -> None:
 
     return_code, extended_memory = try_build_copy_sample(board_name, sample_name, f"samples/{sample_path}", sample_args)
 
+    format_args = {
+        "board_name": board_name,
+        "sample_name": sample_name,
+    }
+
+    elf_name = config.artifact_paths["elf"].format(**format_args)
+    elf_md5_name = config.artifact_paths["elf-md5"].format(**format_args)
+
     result = {
         "platform": board_name,
         "sample_name": sample_name,
-        "success": return_code == 0,
+        "success": (return_code == 0) and os.path.exists(elf_name),
         "extended_memory": extended_memory,
         "configs": zephyr_config_to_list(config_path) if sample_args is not None else None,
         "zephyr_sha": get_versions()["zephyr"],
         "zephyr_sdk": get_versions()["sdk"],
-    }
-
-    format_args = {
-        "board_name": board_name,
-        "sample_name": sample_name,
     }
 
     # Create JSON with build results
@@ -211,8 +214,6 @@ def main(board_name: str, sample_name: str) -> None:
 
     if result["success"]:
         # Create MD5 hash file for the binary
-        elf_name = config.artifact_paths["elf"].format(**format_args)
-        elf_md5_name = config.artifact_paths["elf-md5"].format(**format_args)
         with open(elf_md5_name, "w") as f:
             f.write(calculate_md5(elf_name))
 
