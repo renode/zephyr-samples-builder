@@ -57,7 +57,7 @@ def build_copy_sample(platform: str, sample_name: str, sample_path: str, args: s
         tuple: A tuple containing the return code (0 for success, 1 for failure)
         and the output of the 'west build' command
     """
-    project_sample_name = f"{platform}-{sample_name}"
+    project_sample_name = f"{platform}/{sample_name}"
     return_code = 1
 
     # Create the build directory if it doesn't exist
@@ -70,7 +70,7 @@ def build_copy_sample(platform: str, sample_name: str, sample_path: str, args: s
     if os.path.isdir(build_path):
         shutil.rmtree(build_path)
 
-    log_path = f"../../build/{project_sample_name}/{project_sample_name}-zephyr.log"
+    log_path = f"../../build/{project_sample_name}/{sample_name}-zephyr.log"
 
     # Build sample and collect SPDX data
     run_west_cmd(f"west spdx --init -d {build_path}", log_path)
@@ -179,7 +179,7 @@ def main(board_name: str, sample_name: str) -> None:
     """
 
     sample_path = get_sample_path(sample_name)
-    os.makedirs(f"build/{board_name}-{sample_name}", exist_ok=True)
+    os.makedirs(f"build/{board_name}/{sample_name}", exist_ok=True)
 
     config_path = f"configs/{sample_name}.conf"
     if os.path.exists(config_path):

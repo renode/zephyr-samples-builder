@@ -1,18 +1,18 @@
 project_path: "zephyrproject/zephyr"
 
-artifact_prefix: "build/{board_name}-{sample_name}/"
+artifact_prefix: "build/{board_name}/{sample_name}/"
 artifact_names:
-  build-log:   "{board_name}-{sample_name}-zephyr.log"
-  config:      "{board_name}-{sample_name}-config"
-  dts:         "{board_name}-{sample_name}.dts"
-  elf:         "{board_name}-zephyr-{sample_name}.elf"
-  elf-md5:     "{board_name}-zephyr-{sample_name}.elf.md5"
-  sbom-app:    "{board_name}-{sample_name}-app.spdx"
-  sbom-build:  "{board_name}-{sample_name}-build.spdx"
-  sbom-zephyr: "{board_name}-{sample_name}-zephyr.spdx"
-  zip-sbom:    "{board_name}-{sample_name}-sbom.zip"
-  zip-all:     "{board_name}-{sample_name}-all.zip"
-  result:      "{board_name}-{sample_name}-result.json"
+  build-log:   "{sample_name}-zephyr.log"
+  config:      "{sample_name}-config"
+  dts:         "{sample_name}.dts"
+  elf:         "zephyr-{sample_name}.elf"
+  elf-md5:     "zephyr-{sample_name}.elf.md5"
+  sbom-app:    "{sample_name}-app.spdx"
+  sbom-build:  "{sample_name}-build.spdx"
+  sbom-zephyr: "{sample_name}-zephyr.spdx"
+  zip-sbom:    "{sample_name}-sbom.zip"
+  zip-all:     "{sample_name}-all.zip"
+  result:      "{sample_name}-result.json"
 
 # The path is relative to `zephyr/samples`
 samples:
