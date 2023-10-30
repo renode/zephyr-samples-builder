@@ -117,6 +117,7 @@ jobs:
             build/**/*-result.json
 
       - id: gcp-auth
+        if: ${{github.event_name == 'push' && github.ref == 'refs/heads/main'}}
         name: GCP Authentcation
         uses: google-github-actions/auth@v1
         with:
@@ -127,6 +128,7 @@ jobs:
           export_environment_variables: false
 
       - name: Set up Cloud SDK
+        if: ${{github.event_name == 'push' && github.ref == 'refs/heads/main'}}
         uses: google-github-actions/setup-gcloud@v1
         env:
           GOOGLE_GHA_CREDS_PATH: ${{ steps.gcp-auth.outputs.credentials_file_path }}
@@ -134,6 +136,7 @@ jobs:
           version: '>= 363.0.0'
 
       - name: Upload artifacts to GCP
+        if: ${{github.event_name == 'push' && github.ref == 'refs/heads/main'}}
         run: |
           gsutil -m rsync -r build/ gs://zephyr-samples-builder/zephyr/$ZEPHYR_VERSION 
 
