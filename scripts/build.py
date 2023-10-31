@@ -11,6 +11,7 @@ import time
 from argparse import ArgumentParser
 import json
 import config
+import yaml
 from common import bold, print_frame, create_zip_archive, find_node_size, get_sample_path, calculate_md5, get_versions, zephyr_config_to_list
 
 templateLoader = jinja2.FileSystemLoader(searchpath="./")
@@ -169,7 +170,29 @@ def try_build_copy_sample(platform: str, sample_name: str, sample_path: str, sam
     return (return_code, extended_memory)
 
 
-def main(board_name: str, sample_name: str) -> None:
+def get_full_name(yaml_filename):
+    if os.path.exists(yaml_filename):
+        with open(yaml_filename) as f:
+            board_data = yaml.load(f, Loader=yaml.FullLoader)
+        full_board_name = board_data['name']
+        if len(full_board_name) > 50:
+            full_board_name = re.sub(r'\(.*\)', '', full_board_name)
+    else:
+        full_board_name = ''
+    return full_board_name
+
+
+def get_board_yaml_path(arch, board_name):
+    board_yaml = f'{config.project_path}/boards/{arch}/{board_name}/{board_name}.yaml'
+
+    # this hack is needed for pinetime_devkit0
+    if not os.path.exists(board_yaml):
+        board_yaml = f'{config.project_path}/boards/{arch}/{board_name}/{board_name.replace("_", "-")}.yaml'
+
+    return board_yaml
+
+
+def main(arch: str, board_name: str, sample_name: str) -> None:
     """
     Main function to build a Zephyr sample for a specific board and create relevant artifacts.
 
@@ -197,6 +220,8 @@ def main(board_name: str, sample_name: str) -> None:
     elf_name = config.artifact_paths["elf"].format(**format_args)
     elf_md5_name = config.artifact_paths["elf-md5"].format(**format_args)
 
+    platform_full_name = get_full_name(get_board_yaml_path(arch, board_name))
+
     result = {
         "platform": board_name,
         "sample_name": sample_name,
@@ -205,6 +230,8 @@ def main(board_name: str, sample_name: str) -> None:
         "configs": zephyr_config_to_list(config_path) if sample_args is not None else None,
         "zephyr_sha": get_versions()["zephyr"],
         "zephyr_sdk": get_versions()["sdk"],
+        "arch": arch,
+        "platform_full_name": platform_full_name
     }
 
     # Create JSON with build results
@@ -230,6 +257,7 @@ def main(board_name: str, sample_name: str) -> None:
 
 if __name__ == "__main__":
     ap = ArgumentParser()
+    ap.add_argument("arch")
     ap.add_argument("board_name")
     ap.add_argument("sample_name")
     ap.add_argument("-j", "--job-number")
@@ -239,6 +267,7 @@ if __name__ == "__main__":
     config.load()
 
     multijob = args.job_number is not None and args.jobs_total is not None
+    arch = args.arch
     board_name = args.board_name
     sample_name = args.sample_name
 
@@ -246,7 +275,7 @@ if __name__ == "__main__":
         start_time = time.time()
         print_frame(f"job {args.job_number} / {args.jobs_total} started")
 
-    main(board_name, sample_name)
+    main(arch, board_name, sample_name)
 
     if multijob:
         total_time = time.time() - start_time

@@ -91,12 +91,42 @@ def process_sample_data(aggregated_jsons: list) -> dict:
 
     return sample_dict
 
+
+def collective_json_result(aggregated_results: list) -> str:
+    """
+    Process aggregated build result into a single JSON organized by board names.
+    """
+    collective = dict()
+    for result in aggregated_results:
+        sample_name = result["sample_name"]
+        platform = result["platform"]
+
+        if platform not in collective:
+            collective[platform] = dict(
+                    arch=result["arch"],
+                    name=result["platform_full_name"],
+                    samples=dict())
+
+        sample_entry = dict(
+            status="BUILT" if result["success"] else "NOT BUILT",
+            extended_memory=result["extended_memory"],
+        )
+
+        collective[platform]["samples"][sample_name] = sample_entry
+
+    return json.dumps(collective)
+
 def main():
     versions = get_versions()
     summary_data = aggregate_json_files("build/")
 
     # Data for markdown table
     stats = generate_stats(summary_data)
+    json_res = collective_json_result(summary_data)
+
+    with open('build/result.json', 'w') as res:
+        res.write(json_res)
+
     sample_data = process_sample_data(summary_data)
 
     # Render the table

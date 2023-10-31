@@ -13,7 +13,7 @@ def get_boards() -> list:
     - Supported CPU architecture
 
     Returns:
-        list: A filtered list of Zephyr's board objects.
+        list: A filtered list of pairs (arch, board).
     """
     # the Zephyr utility has its own argument parsing, so avoid args clash
     sys.path.append(f"{config.project_path}/scripts")
@@ -41,7 +41,7 @@ def get_boards() -> list:
     omit_board = ("acrn", "qemu", "native", "nsim", "xenvm", "xt-sim")
     boards_to_run = list(filter(lambda x: all(map(lambda y: y not in x.name, omit_board)), boards_to_run))
 
-    return [board.name for board in boards_to_run]
+    return [(board.arch, board.name) for board in boards_to_run]
 
 
 def generate_samples() -> None:
@@ -51,12 +51,12 @@ def generate_samples() -> None:
     If sample has defined 'boards' key, only generate the samples for given boards,
     otherwise generate the sample for all boards
     """
-    all_boards = get_boards()
-    for board in all_boards:
+    all_boards_data = get_boards()
+    for arch, board in all_boards_data:
         for sample, sample_data in config.samples.items():
             sample_boards = sample_data.get("boards", [board])
             if board in sample_boards:
-                print(f"{board} {sample}")
+                print(f"{arch} {board} {sample}")
 
 if __name__ == "__main__":
     config.load()

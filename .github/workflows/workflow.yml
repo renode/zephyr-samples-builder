@@ -146,6 +146,10 @@ jobs:
     needs: Build
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: 'read'
+      id-token: write
+
     steps:
       - uses: actions/checkout@v3
       - name: Download build status results
@@ -162,3 +166,26 @@ jobs:
         run: |
           ./scripts/generate_summary.py -c zephyr.yaml >> $GITHUB_STEP_SUMMARY
 
+      - id: gcp-auth
+        if: ${{github.event_name == 'push' && github.ref == 'refs/heads/main'}}
+        name: GCP Authentcation
+        uses: google-github-actions/auth@v1
+        with:
+          service_account: ${{ secrets.GCP_SA }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          cleanup_credentials: true
+          create_credentials_file: true
+          export_environment_variables: false
+
+      - name: Set up Cloud SDK
+        if: ${{github.event_name == 'push' && github.ref == 'refs/heads/main'}}
+        uses: google-github-actions/setup-gcloud@v1
+        env:
+          GOOGLE_GHA_CREDS_PATH: ${{ steps.gcp-auth.outputs.credentials_file_path }}
+        with:
+          version: '>= 363.0.0'
+
+      - name: Upload artifacts to GCP
+        if: ${{github.event_name == 'push' && github.ref == 'refs/heads/main'}}
+        run: |
+          gsutil cp build/result.json gs://zephyr-samples-builder/zephyr/$ZEPHYR_VERSION
