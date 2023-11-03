@@ -72,7 +72,7 @@ jobs:
           sudo apt -qq install --no-install-recommends git cmake ninja-build gperf \
           ccache dfu-util device-tree-compiler wget \
           python3-dev python3-pip python3-setuptools python3-tk python3-wheel xz-utils file \
-          make gcc gcc-multilib g++-multilib libsdl2-dev libmagic1 parallel 
+          make gcc gcc-multilib g++-multilib libsdl2-dev libmagic1 parallel
 
           ls -lah
 
@@ -97,7 +97,7 @@ jobs:
 
           # List workload
           ls -l boards_sample_pairs-*
-      
+
       - name: Build matrix
         run: |
           echo Zephyr Matrix Runner @${{ matrix.runner }} of ${MATRIX_RUNNERS}
@@ -138,7 +138,7 @@ jobs:
       - name: Upload artifacts to GCP
         if: ${{github.event_name == 'push' && github.ref == 'refs/heads/main'}}
         run: |
-          gsutil -m rsync -r build/ gs://zephyr-samples-builder/zephyr/$ZEPHYR_VERSION 
+          gsutil -m rsync -r build/ gs://zephyr-samples-builder/zephyr/$ZEPHYR_VERSION
 
 
 
@@ -161,4 +161,4 @@ jobs:
       - name: Print status
         run: |
           ./scripts/generate_summary.py -c zephyr.yaml >> $GITHUB_STEP_SUMMARY
-    
+
