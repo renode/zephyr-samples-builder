@@ -7,10 +7,8 @@ from common import flatten
 
 def get_boards() -> list:
     """
-    Get a list of "supported" boards from the Zephyr project.
-    By supported we understand:
-    - Not a virtual or posix platform
-    - Supported CPU architecture
+    Get a list of boards from the Zephyr project.
+    Virtual and posix platforms (apart from QEMU) are filtered out.
 
     Returns:
         list: A filtered list of pairs (arch, board).
@@ -25,20 +23,13 @@ def get_boards() -> list:
         board_roots = [Path(config.project_path)]
 
     zephyr_boards = find_arch2boards(Args())
-    flat_boards = flatten(zephyr_boards)
+    boards_to_run = flatten(zephyr_boards).values()
 
-    # Filter QEMU and ARM Fixed Virtual Platforms
-    flat_boards = dict(filter(lambda b: "qemu" not in b[0] and "native" not in b[0], flat_boards.items()))
-    flat_boards = dict(filter(lambda b: not b[0].startswith("fvp_"), flat_boards.items()))
+    omit_arch = ("posix",)
+    boards_to_run = filter(lambda x: x.arch not in omit_arch, boards_to_run)
 
-    boards_to_run = flat_boards.values()
-
-    # Filter unsupported architectures
-    omit_arch = ("arc", "posix")
-    boards_to_run = filter(lambda x: all(map(lambda y: y != x.arch, omit_arch)), boards_to_run)
-
-    # Filter out remaining boards that match the keywords
-    omit_board = ("acrn", "qemu", "native", "nsim", "xenvm", "xt-sim")
+    # Do not build for simulation targets (apart from QEMU).
+    omit_board = ("nsim", "xenvm", "xt-sim", "fvp_")
     boards_to_run = list(filter(lambda x: all(map(lambda y: y not in x.name, omit_board)), boards_to_run))
 
     return [(board.arch, board.name) for board in boards_to_run]
