@@ -209,14 +209,16 @@ def get_full_name(yaml_filename):
     return full_board_name
 
 
-def get_board_yaml_path(arch, board_name):
-    board_yaml = f'{config.project_path}/boards/{arch}/{board_name}/{board_name}.yaml'
+def get_board_yaml_path(board_dir, board_name):
+    yamlpath = f'{board_dir}/{board_name}.yaml'
+
+    if not os.path.exists(yamlpath):
+        raise Exception(f"Could not find a YAML file for the board '{board_name}': {yamlpath}")
+
+    return yamlpath
 
 
-    return board_yaml
-
-
-def main(arch: str, board_name: str, sample_name: str) -> None:
+def main(board_dir: str, board_name: str, sample_name: str) -> None:
     """
     Main function to build a Zephyr sample for a specific board and create relevant artifacts.
 
@@ -244,7 +246,11 @@ def main(arch: str, board_name: str, sample_name: str) -> None:
     elf_name = config.artifact_paths["elf"].format(**format_args)
     elf_md5_name = config.artifact_paths["elf-md5"].format(**format_args)
 
-    platform_full_name = get_full_name(get_board_yaml_path(arch, board_name))
+    platform_full_name = get_full_name(get_board_yaml_path(board_dir, board_name))
+    try:
+        arch = board_dir.split("/")[-2]
+    except IndexError:
+        raise Exception(f"Could not deduce `arch` from the provided board directory: `{board_dir}`.")
 
     result = {
         "platform": board_name,
@@ -281,7 +287,7 @@ def main(arch: str, board_name: str, sample_name: str) -> None:
 
 if __name__ == "__main__":
     ap = ArgumentParser()
-    ap.add_argument("arch")
+    ap.add_argument("board_dir")
     ap.add_argument("board_name")
     ap.add_argument("sample_name")
     ap.add_argument("-j", "--job-number")
@@ -291,7 +297,7 @@ if __name__ == "__main__":
     config.load()
 
     multijob = args.job_number is not None and args.jobs_total is not None
-    arch = args.arch
+    board_dir = args.board_dir
     board_name = args.board_name
     sample_name = args.sample_name
 
@@ -299,7 +305,7 @@ if __name__ == "__main__":
         start_time = time.time()
         print_frame(f"job {args.job_number} / {args.jobs_total} started")
 
-    main(arch, board_name, sample_name)
+    main(board_dir, board_name, sample_name)
 
     if multijob:
         total_time = time.time() - start_time
