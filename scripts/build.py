@@ -212,9 +212,6 @@ def get_full_name(yaml_filename):
 def get_board_yaml_path(arch, board_name):
     board_yaml = f'{config.project_path}/boards/{arch}/{board_name}/{board_name}.yaml'
 
-    # this hack is needed for pinetime_devkit0
-    if not os.path.exists(board_yaml):
-        board_yaml = f'{config.project_path}/boards/{arch}/{board_name}/{board_name.replace("_", "-")}.yaml'
 
     return board_yaml
 
