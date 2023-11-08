@@ -20,6 +20,30 @@ templateEnv = jinja2.Environment(loader=templateLoader)
 dts_overlay_template = templateEnv.get_template("templates/overlay.dts")
 
 
+def find_elf_file(default_name: str) -> str:
+    """
+    Search for an ELF file.
+    Use in cases when a board uses non-default name for the file.
+
+    Parameters:
+        default_name (str): The expected filename of the ELF file.
+
+    Returns:
+        str: filename if an ELF exists, otherwise empty.
+    """
+
+    if os.path.exists(default_name):
+        return default_name
+
+    for root, _, files in os.walk(os.path.dirname(default_name)):
+        for _file in files:
+            # zephyr_pre0.elf is always created, skip it
+            if _file.endswith(".elf") and _file != "zephyr_pre0.elf":
+                return os.path.join(root, _file)
+
+    return ""
+
+
 def run_west_cmd(cmd: str, log_file: str) -> tuple[int, str]:
     """
     Execute a west command and log the output to a file.
@@ -100,6 +124,9 @@ def build_copy_sample(platform: str, sample_name: str, sample_path: str, args: s
         file_path = f"{config.project_path}/{build_path}/{file_name}"
         if os.path.exists(file_path):
             shutil.copyfile(file_path, config.artifact_paths[key].format(**format_args))
+        elif key == "elf" and (elf := find_elf_file(file_path)):
+            # Platforms may change the default name of the ELF artifact (`esp32s3_devkitm_appcpu`).
+            shutil.copyfile(elf, config.artifact_paths[key].format(**format_args))
 
     # Clean up
     if os.path.isdir(f"{config.project_path}/{build_path}"):
