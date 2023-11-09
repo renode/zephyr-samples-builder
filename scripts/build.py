@@ -197,16 +197,20 @@ def try_build_copy_sample(platform: str, sample_name: str, sample_path: str, sam
     return (return_code, extended_memory)
 
 
-def get_full_name(yaml_filename):
-    if os.path.exists(yaml_filename):
-        with open(yaml_filename) as f:
-            board_data = yaml.load(f, Loader=yaml.FullLoader)
-        full_board_name = board_data['name']
-        if len(full_board_name) > 50:
-            full_board_name = re.sub(r'\(.*\)', '', full_board_name)
-    else:
-        full_board_name = ''
+def get_yaml_data(yaml_filename):
+    with open(yaml_filename) as f:
+        return yaml.load(f, Loader=yaml.FullLoader)
+
+
+def get_full_name(yaml_data):
+    full_board_name = yaml_data['name']
+    if len(full_board_name) > 50:
+        full_board_name = re.sub(r'\(.*\)', '', full_board_name)
     return full_board_name
+
+
+def get_arch(yaml_data):
+    return yaml_data['arch']
 
 
 def get_board_yaml_path(board_dir, board_name):
@@ -246,11 +250,9 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
     elf_name = config.artifact_paths["elf"].format(**format_args)
     elf_md5_name = config.artifact_paths["elf-md5"].format(**format_args)
 
-    platform_full_name = get_full_name(get_board_yaml_path(board_dir, board_name))
-    try:
-        arch = board_dir.split("/")[-2]
-    except IndexError:
-        raise Exception(f"Could not deduce `arch` from the provided board directory: `{board_dir}`.")
+    board_yaml_data = get_yaml_data(get_board_yaml_path(board_dir, board_name))
+    platform_full_name = get_full_name(board_yaml_data)
+    arch = get_arch(board_yaml_data)
 
     result = {
         "platform": board_name,
