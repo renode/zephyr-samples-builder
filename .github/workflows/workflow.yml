@@ -140,7 +140,61 @@ jobs:
         run: |
           gsutil -m rsync -r build/ gs://zephyr-samples-builder/zephyr/$ZEPHYR_VERSION
 
+  Update-latest-status:
+    needs: Build
+    runs-on: ubuntu-latest
+    if: ${{github.event_name == 'push' && github.ref == 'refs/heads/main'}}
+    concurrency: update_latest_status
 
+    permissions:
+      contents: 'read'
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          key: ${{ runner.os }}-build-${{ github.sha }}
+          path: |
+            zephyrproject/
+            zephyr-sdk/
+            micropython/
+            boards_sample_pairs
+
+      - id: gcp-auth
+        name: GCP Authentcation
+        uses: google-github-actions/auth@v1
+        with:
+          service_account: ${{ secrets.GCP_SA }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          cleanup_credentials: true
+          create_credentials_file: true
+          export_environment_variables: false
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        env:
+          GOOGLE_GHA_CREDS_PATH: ${{ steps.gcp-auth.outputs.credentials_file_path }}
+        with:
+          version: '>= 363.0.0'
+
+      - name: Update the `latest` file in the bucket.
+        run: |
+          CURRENT_LATEST=""
+          LATEST_REMOTE_FILE="gs://zephyr-samples-builder/zephyr/latest"
+
+          # If the `latest` file exists, read its contents.
+          ! gsutil -q stat $LATEST_REMOTE_FILE \
+            || CURRENT_LATEST=$(gsutil cat $LATEST_REMOTE_FILE)
+
+          cd zephyrproject/zephyr
+          git fetch origin main
+
+          # if `latest doesn't exist or is older then ZEPHYR_VERSION that was built in this workflow.
+          if [ -z "$CURRENT_LATEST" ] || ! git merge-base --is-ancestor "$ZEPHYR_VERSION" "$CURRENT_LATEST"; then
+              echo $ZEPHYR_VERSION > latest
+              gsutil cp latest $LATEST_REMOTE_FILE
+          fi
 
   Print-status:
     needs: Build
