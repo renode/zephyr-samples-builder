@@ -32,7 +32,7 @@ def get_boards() -> list:
     omit_board = ("nsim", "xenvm", "xt-sim", "fvp_")
     boards_to_run = list(filter(lambda x: all(map(lambda y: y not in x.name, omit_board)), boards_to_run))
 
-    return [(board.arch, board.name) for board in boards_to_run]
+    return [(board.dir, board.name) for board in boards_to_run]
 
 
 def generate_samples() -> None:
@@ -43,11 +43,11 @@ def generate_samples() -> None:
     otherwise generate the sample for all boards
     """
     all_boards_data = get_boards()
-    for arch, board in all_boards_data:
+    for dir, board in all_boards_data:
         for sample, sample_data in config.samples.items():
             sample_boards = sample_data.get("boards", [board])
             if board in sample_boards:
-                print(f"{arch} {board} {sample}")
+                print(f"{dir} {board} {sample}")
 
 if __name__ == "__main__":
     config.load()

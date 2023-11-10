@@ -243,3 +243,10 @@ jobs:
         if: ${{github.event_name == 'push' && github.ref == 'refs/heads/main'}}
         run: |
           gsutil cp build/result.json gs://zephyr-samples-builder/zephyr/$ZEPHYR_VERSION
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: status
+          path: |
+            build/result.json
