@@ -138,6 +138,7 @@ jobs:
       - name: Upload artifacts to GCP
         if: ${{github.event_name == 'push' && github.ref == 'refs/heads/main'}}
         run: |
+          source .env
           gsutil -m rsync -r build/ gs://zephyr-samples-builder/zephyr/$ZEPHYR_VERSION
 
   Update-latest-status:
@@ -244,6 +245,7 @@ jobs:
       - name: Upload artifacts to GCP
         if: ${{github.event_name == 'push' && github.ref == 'refs/heads/main'}}
         run: |
+          source .env
           gsutil cp build/result.json gs://zephyr-samples-builder/zephyr/$ZEPHYR_VERSION
 
       - name: Upload artifacts
