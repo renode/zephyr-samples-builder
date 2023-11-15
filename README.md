@@ -26,7 +26,6 @@ Artifacts generated during the build process:
   - `sbom-zephyr`: SPDX for Zephyr components.
 * ZIP files:
   - `zip-sbom`: ZIP archive of all SBOM files.
-  - `zip-all`: ZIP archive of all generated artifacts.
 * JSON files:
   - `result`: Build outcome JSON file.
 

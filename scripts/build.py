@@ -280,12 +280,6 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
         sbom_zip_name = config.artifact_paths["zip-sbom"].format(**format_args)
         create_zip_archive(sbom_zip_name, format_args, files=["sbom-app", "sbom-zephyr", "sbom-build"])
 
-    # Create a ZIP archive with all artifacts
-    all_zip_name = config.artifact_paths["zip-all"].format(**format_args)
-    all_artifacts = list(config.artifact_paths.keys())
-    all_artifacts.remove("zip-all")
-    create_zip_archive(all_zip_name, format_args, all_artifacts)
-
 
 if __name__ == "__main__":
     ap = ArgumentParser()
