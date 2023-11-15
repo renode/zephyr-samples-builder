@@ -86,7 +86,7 @@ def create_zip_archive(zip_filename: str, format_args: dict, files: list) -> Non
     Raises:
         ValueError: If a key specified in 'files' does not occur in 'config.artifact_paths'
     """
-    with zipfile.ZipFile(zip_filename, "w") as f:
+    with zipfile.ZipFile(zip_filename, "w", compression=zipfile.ZIP_DEFLATED) as f:
         for ftype in files:
             if ftype in config.artifact_paths.keys():
                 fname = config.artifact_paths[ftype].format(**format_args)
