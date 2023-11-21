@@ -33,13 +33,3 @@ samples:
     path: "synchronization"
   lz4:
     path: "compression/lz4"
-  pi:
-    path: "arch/smp/pi"
-    boards:
-      - "nucleo_l476rg"
-      - "hifive1_revb"
-  system_heap:
-    path: basic/sys_heap
-    boards:
-      - "nucleo_l476rg"
-
