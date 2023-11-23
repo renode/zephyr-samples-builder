@@ -2,6 +2,7 @@
 
 import re
 import os
+import yaml
 import zipfile
 import hashlib
 from colorama import Style
@@ -55,6 +56,21 @@ def find_node_size(node: str, dts_filename: str):
     except AttributeError:
         return None
     return node_name, node_size
+
+
+def decode_node(node_name, dts_filename):
+    node = find_node_size(node_name, dts_filename)
+    if node is None:
+        return (None, None, None)
+
+    node_name, node_size = node
+    if len(node_size) >= 2:
+        node_base, node_size = node_size[-2:]
+        node_size = int(node_size, 16)
+
+        return (node_name, node_base, node_size)
+    else:
+        return (node_name, node_size, None)
 
 
 def flatten(boards: dict):
@@ -153,3 +169,17 @@ def zephyr_config_to_list(config_path: str) -> list:
     """
     with open(config_path, 'r') as cfg:
         return [line.strip() for line in cfg if line.strip() and not line.startswith('#')]
+
+
+def get_yaml_data(yaml_filename: str):
+    """
+    Load data from a YAML file.
+
+    Args:
+        yaml_filename (str): Path to the YAML file.
+
+    Returns:
+        Any: Parsed YAML data.
+    """
+    with open(yaml_filename) as f:
+        return yaml.load(f, Loader=yaml.SafeLoader)
