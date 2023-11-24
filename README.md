@@ -34,6 +34,8 @@ Artifacts generated during the build process:
 The `result.json` file consists the following keys:
 
 * `platform`: The platform (board) on which the sample was built.
+* `platform_full_name`: Full platform name from the board `yaml` file.
+* `arch`: The platform's CPU architecture.
 * `sample_name`: The name of the Zephyr sample.
 * `success`: Indicates if the build was successful.
 * `extended_memory`: Indicates if memory was extended during the build.
