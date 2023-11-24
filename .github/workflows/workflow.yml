@@ -27,7 +27,7 @@ jobs:
         id: set-matrix
         run: |
           source .env
-          ./scripts/get_boards_samples_pairs.py -c zephyr.yaml > boards_sample_pairs
+          ./scripts/get_boards_samples_pairs.py -c zephyr.yaml | shuf > boards_sample_pairs
           echo "matrix=`./scripts/generate_matrix.py`" >> $GITHUB_OUTPUT
           ls -lah
 
