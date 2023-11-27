@@ -2,7 +2,7 @@ name: Build
 on: [push]
 
 env:
-  MATRIX_RUNNERS: 8  # do not saturate runner pool
+  MATRIX_RUNNERS: 12  # do not saturate runner pool
 
 jobs:
 
@@ -85,8 +85,6 @@ jobs:
           cd zephyrproject/zephyr
           pip3 -q install -r scripts/requirements.txt
           cd ..
-          west config manifest.group-filter -- +ci,+optional
-          west update
           west zephyr-export
           cd ..
 

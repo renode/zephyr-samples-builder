@@ -36,6 +36,7 @@ wait
 # Zephyrproject setup
 west init -l zephyrproject/zephyr
 cd zephyrproject
+west config manifest.group-filter -- +ci,+optional
 
 for i in $(seq 1 5)
 do
