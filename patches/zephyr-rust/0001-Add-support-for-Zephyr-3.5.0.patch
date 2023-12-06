@@ -1,0 +1,77 @@
+From 9e659c5e29365fe83d73cdcb4309a9cc39852825 Mon Sep 17 00:00:00 2001
+From: Mateusz Sierszulski <msierszulski@antmicro.com>
+Date: Mon, 4 Dec 2023 16:25:59 +0100
+Subject: [PATCH] Add support for Zephyr 3.5.0
+
+---
+ rust/zephyr-core/build.rs      | 3 +++
+ rust/zephyr-core/src/thread.rs | 9 ++++++++-
+ samples/rust-app/prj.conf      | 1 +
+ scripts/gen_syscalls.py        | 2 +-
+ 4 files changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/rust/zephyr-core/build.rs b/rust/zephyr-core/build.rs
+index 750c4ac..2385ac6 100644
+--- a/rust/zephyr-core/build.rs
++++ b/rust/zephyr-core/build.rs
+@@ -5,6 +5,9 @@ fn main() {
+     let kernel_version = u32::from_str_radix(&kernel_version_str_trimmed, 16)
+         .expect("ZEPHYR_KERNEL_VERSION_NUM must be an integer");
+ 
++    if kernel_version >= 0x3_05_00 {
++        println!("cargo:rustc-cfg=zephyr350");
++    }
+     if kernel_version >= 0x3_00_00 {
+         println!("cargo:rustc-cfg=zephyr300");
+     }
+diff --git a/rust/zephyr-core/src/thread.rs b/rust/zephyr-core/src/thread.rs
+index 80ee46a..f9a2291 100644
+--- a/rust/zephyr-core/src/thread.rs
++++ b/rust/zephyr-core/src/thread.rs
+@@ -50,13 +50,20 @@ macro_rules! trait_impl {
+                 })
+             }
+ 
+-            #[cfg(any(zephyr300, all(zephyr270, not(tls))))]
++            #[cfg(all(not(zephyr350), any(zephyr300, all(zephyr270, not(tls)))))]
+             fn k_current_get() -> crate::thread::ThreadId {
+                 ThreadId(unsafe {
+                     NonNull::new_unchecked(zephyr_sys::syscalls::$context::z_current_get())
+                 })
+             }
+ 
++            #[cfg(zephyr350)]
++            fn k_current_get() -> crate::thread::ThreadId {
++                ThreadId(unsafe {
++                    NonNull::new_unchecked(zephyr_sys::syscalls::$context::k_sched_current_thread_query())
++                })
++            }
++
+             fn k_object_access_grant<K: KObj>(kobj: &K, thread: ThreadId) {
+                 if !zephyr_sys::raw::RUST_CONFIG_USERSPACE {
+                     // Avoid unnecessary call to stub function
+diff --git a/samples/rust-app/prj.conf b/samples/rust-app/prj.conf
+index 613e7f4..4392540 100644
+--- a/samples/rust-app/prj.conf
++++ b/samples/rust-app/prj.conf
+@@ -6,3 +6,4 @@ CONFIG_NATIVE_UART_0_ON_OWN_PTY=y
+ CONFIG_USERSPACE=y
+ CONFIG_QEMU_ICOUNT=n
+ CONFIG_LOG=y
++CONFIG_MINIMAL_LIBC=y
+diff --git a/scripts/gen_syscalls.py b/scripts/gen_syscalls.py
+index 90c9dea..bf63be6 100755
+--- a/scripts/gen_syscalls.py
++++ b/scripts/gen_syscalls.py
+@@ -147,7 +147,7 @@ def main():
+     whitelist = set(["kernel.h", "kobject.h", "device.h", "uart.h", "mutex.h", "errno_private.h", "eeprom.h", "time.h"])
+     includes = ["kernel.h", "device.h", "drivers/uart.h", "sys/mutex.h", "sys/errno_private.h", "drivers/eeprom.h", "posix/time.h"]
+ 
+-    for match_group, fn in syscalls:
++    for match_group, fn, *rest in syscalls:
+         if fn not in whitelist:
+             continue
+         include = "syscalls/%s" % fn
+-- 
+2.30.2
+
