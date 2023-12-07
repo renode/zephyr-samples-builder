@@ -2,7 +2,7 @@ name: Build
 on: [push]
 
 env:
-  MATRIX_RUNNERS: 12  # do not saturate runner pool
+  MATRIX_RUNNERS: 16  # do not saturate runner pool
 
 jobs:
 
