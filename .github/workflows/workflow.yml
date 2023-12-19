@@ -141,11 +141,11 @@ jobs:
           source .env
           gsutil -m rsync -r build/ gs://zephyr-samples-builder/zephyr/$ZEPHYR_VERSION
 
-  Update-latest-status:
+  Update-version-info:
     needs: Build
     runs-on: ubuntu-latest
     if: ${{github.event_name == 'push' && github.ref == 'refs/heads/main'}}
-    concurrency: update_latest_status
+    concurrency: update_version_info
 
     permissions:
       contents: 'read'
@@ -196,6 +196,26 @@ jobs:
           if [ -z "$CURRENT_LATEST" ] || ! git merge-base --is-ancestor "$ZEPHYR_VERSION" "$CURRENT_LATEST"; then
               echo $ZEPHYR_VERSION > latest
               gsutil cp latest $LATEST_REMOTE_FILE
+          fi
+
+      - name: Update the `versions` file in the bucket.
+        run: |
+          source .env
+          VERSIONS_REMOTE_FILE="gs://zephyr-samples-builder/zephyr/versions"
+          touch versions
+
+          # If the `latest` file exists, read its contents.
+          ! gsutil -q stat $VERSIONS_REMOTE_FILE \
+            || gsutil cp $VERSIONS_REMOTE_FILE versions
+
+          COUNT_ENTRIES=$(wc -l < versions)
+          echo "The remote file has $COUNT_ENTRIES entries."
+
+          # Store information about the version.
+          if grep -q "$ZEPHYR_VERSION" versions; then
+              echo "New version candidate for the versions file:"
+              echo "$ZEPHYR_VERSION" | tee -a versions
+              gsutil cp versions $VERSIONS_REMOTE_FILE
           fi
 
   Print-status:
