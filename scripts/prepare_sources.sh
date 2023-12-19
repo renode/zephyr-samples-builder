@@ -19,7 +19,15 @@ cd zephyrproject/zephyr
 git init > /dev/null 2> /dev/null
 git remote add origin https://github.com/zephyrproject-rtos/zephyr
 git pull --depth 1 origin ${ZEPHYR_VERSION} > /dev/null 2> /dev/null
-cd ../..
+
+mkdir -p zephyr-rust
+cd zephyr-rust
+git init > /dev/null 2> /dev/null
+git remote add origin https://github.com/tylerwhall/zephyr-rust
+git pull --depth 1 origin ${ZEPHYR_RUST_VERSION} > /dev/null 2> /dev/null
+git submodule update --init --recursive  > /dev/null 2> /dev/null
+git am ../../../patches/zephyr-rust/*.patch
+cd ../../..
 
 # Download Zephyr SDK
 mkdir -p zephyr-sdk

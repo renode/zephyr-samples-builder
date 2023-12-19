@@ -33,3 +33,5 @@ samples:
     path: "synchronization"
   lz4:
     path: "compression/lz4"
+  rust-app:
+    path: "../zephyr-rust/samples/rust-app"
