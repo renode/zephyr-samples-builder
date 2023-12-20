@@ -419,7 +419,7 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
     os.makedirs(f"build/{project_sample_name}", exist_ok=True)
 
     # Save logs
-    shutil.copyfile(run.log_file, f"build/{project_sample_name}/{sample_name}-zephyr.log")
+    shutil.copyfile(run.log_file, f"build/{project_sample_name}/{sample_name}.log")
 
     # Save original DTS
     if run.dts_modified:
@@ -430,7 +430,7 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
             filename = os.path.basename(path)
             shutil.copyfile(path, f"build/{project_sample_name}/{sample_name}-{filename}")
         elif key == "elf":
-            shutil.copyfile(path, f"build/{project_sample_name}/zephyr-{sample_name}.elf")
+            shutil.copyfile(path, f"build/{project_sample_name}/{sample_name}.elf")
         elif key == "dts":
             shutil.copyfile(path, f"build/{project_sample_name}/{sample_name}.dts")
         elif key == "config":
