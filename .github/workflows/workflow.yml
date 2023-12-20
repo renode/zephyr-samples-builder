@@ -212,10 +212,13 @@ jobs:
           echo "The remote file has $COUNT_ENTRIES entries."
 
           # Store information about the version.
-          if grep -q "$ZEPHYR_VERSION" versions; then
+          if ! grep -q "$ZEPHYR_VERSION" versions; then
               echo "New version candidate for the versions file:"
               echo "$ZEPHYR_VERSION" | tee -a versions
               gsutil cp versions $VERSIONS_REMOTE_FILE
+          else
+              echo "The version is already present in the versions file:"
+              echo "$ZEPHYR_VERSION"
           fi
 
   Print-status:
