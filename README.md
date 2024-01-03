@@ -1,6 +1,6 @@
 # Zephyr Samples Builder
 
-Copyright (c) 2023 [Antmicro](https://www.antmicro.com)
+Copyright (c) 2023-2024 [Antmicro](https://www.antmicro.com)
 
 A GitHub Actions workflow for building Zephyr RTOS samples for multiple platforms.
 
