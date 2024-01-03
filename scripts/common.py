@@ -205,3 +205,37 @@ def conv_zephyr_mem_usage(val: str) -> int:
         val = int(val[:-3]) * 1024 ** 3
 
     return val
+
+
+def get_dts_include_chain(arch: str, dts_filename: str, chain=[]) -> list:
+    """
+    Recursively read .dts file to retrieve the CPU dependency chain.
+
+    Args:
+        arch (str): The target CPU architecture.
+        dts_filename (str): The name of the .dts file to be parsed.
+        chain (list): A list for keeping track of the dependencies.
+
+    Returns:
+        list: Contains the name(s) of the CPU as determined from the .dts file(s).
+    """
+    next_include = ''
+    if os.path.exists(dts_filename):
+        with open(dts_filename) as f:
+            dts_file = f.readlines()
+        for line in dts_file:
+            if next_include == '' and line.startswith('#include'):
+                _, next_include = line.split()
+                local = not (next_include.startswith('<') and next_include.endswith('>'))
+                next_include = next_include.strip(' "<>')
+                name, extension = os.path.splitext(next_include)
+                if extension.strip('.') == 'h':
+                    next_include = ''
+                    continue
+                if local:
+                    dtsi_filename = f'{os.path.dirname(dts_filename)}/{next_include}'
+                    name = '!' + name
+                else:
+                    dtsi_filename = f'{config.project_path}/dts/{arch}/{next_include}'
+                return get_dts_include_chain(arch, dtsi_filename, chain + [name])
+    return chain

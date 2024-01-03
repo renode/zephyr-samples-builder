@@ -44,3 +44,4 @@ The `result.json` file consists the following keys:
 * `zephyr_sdk`: Zephyr SDK version used for the build.
 * `board_dir`: Board directory in Zephyr tree.
 * `memory`: Memory size and usage.
+* `dts_include_chain`: Device Tree include chain.

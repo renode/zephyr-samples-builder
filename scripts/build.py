@@ -25,6 +25,7 @@ from common import (
     get_yaml_data,
     calculate_md5,
     conv_zephyr_mem_usage,
+    get_dts_include_chain,
 )
 
 templateLoader = jinja2.FileSystemLoader(searchpath="./")
@@ -505,6 +506,7 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
         "platform_full_name": platform_full_name,
         "board_dir": '/'.join(board_dir.split('/')[2:]),  # Drop 'zephyrproject/zephyr' from the path
         "memory": run.get_memory_usage(),
+        "dts_include_chain": get_dts_include_chain(arch, f'{board_dir}/{board_name}.dts'),  # XXX: uses _non-flattened_ device tree
     }
 
     info = "Success!" if run.success else "Fail!"
