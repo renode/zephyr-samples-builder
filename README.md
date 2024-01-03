@@ -42,3 +42,4 @@ The `result.json` file consists the following keys:
 * `configs`: Configuration settings used for the build, or null if not present.
 * `zephyr_sha`: SHA of the Zephyr version used for the build.
 * `zephyr_sdk`: Zephyr SDK version used for the build.
+* `board_dir`: Board directory in Zephyr tree.

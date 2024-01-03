@@ -457,7 +457,8 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
         "zephyr_sha": get_versions()["zephyr"],
         "zephyr_sdk": get_versions()["sdk"],
         "arch": arch,
-        "platform_full_name": platform_full_name
+        "platform_full_name": platform_full_name,
+        "board_dir": '/'.join(board_dir.split('/')[2:]),  # Drop 'zephyrproject/zephyr' from the path
     }
 
     info = "Success!" if run.success else "Fail!"
