@@ -183,3 +183,25 @@ def get_yaml_data(yaml_filename: str):
     """
     with open(yaml_filename) as f:
         return yaml.load(f, Loader=yaml.SafeLoader)
+
+
+def conv_zephyr_mem_usage(val: str) -> int:
+    """
+    Convert Zephyr memory usage value to bytes.
+
+    Args:
+        val (str): Memory usage value with unit (B, KB, MB, GB).
+
+    Returns:
+        int: Memory usage in bytes.
+    """
+    if val.endswith(' B'):
+        val = int(val[:-2])
+    elif val.endswith(' KB'):
+        val = int(val[:-3]) * 1024
+    elif val.endswith(' MB'):
+        val = int(val[:-3]) * 1024 ** 2
+    elif val.endswith(' GB'):
+        val = int(val[:-3]) * 1024 ** 3
+
+    return val

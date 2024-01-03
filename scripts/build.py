@@ -24,6 +24,7 @@ from common import (
     get_versions,
     get_yaml_data,
     calculate_md5,
+    conv_zephyr_mem_usage,
 )
 
 templateLoader = jinja2.FileSystemLoader(searchpath="./")
@@ -73,6 +74,7 @@ class SampleBuilder:
     }
 
     _MEMORY_EXTENSION_REGEX = r"region `(\S+)' overflowed by (\d+) bytes"
+    _MEMORY_USAGE_REGEX = r"(?P<region>\w+){1}:\s*(?P<used>\d+\s+\w{1,2})\s*(?P<size>\d+\s+\w{1,2})\s*(?P<percentage>\d+.\d+%)"
     _ARCH_ERROR_REGEX = r"Arch .*? not supported"
 
     def __del__(self):
@@ -150,6 +152,49 @@ class SampleBuilder:
             artifacts["elf"] = candidate
 
         return artifacts
+
+    def get_memory_usage(self) -> dict | None:
+        """
+            Get memory usage (in bytes) from the Zephyr log file.
+
+            The results are returned as a dict:
+            {'MEM': {'used': 100, 'size': 200 }, ...}
+
+            SIZE is the original node size.
+            If memory node was extended, USED is going to exceed SIZE.
+        """
+        if not self.success:
+            return None
+
+        memory = {}
+        with open(self.log_file) as f:
+            match = re.findall(self._MEMORY_USAGE_REGEX, f.read())
+
+        # Get memory usage statistics
+        for m in match:
+            region, used, size, _ = m
+            memory[region] = {
+                'used': conv_zephyr_mem_usage(used),
+                'size': conv_zephyr_mem_usage(size),
+            }
+
+        # Check if flash size was increased
+        if "memory" in self.overlays:
+            if 'FLASH' in memory:
+                _, flash_size = find_node_size('flash', self.dts_original)
+                flash_size = int(flash_size[-1], 16)
+                memory['FLASH'].update({
+                    'size': flash_size,
+                })
+
+            if 'RAM' in memory:
+                _, ram_size = find_node_size('sram', self.dts_original)
+                ram_size = int(ram_size[-1], 16)
+                memory['RAM'].update({
+                    'size': ram_size,
+                })
+
+        return memory
 
     def _copy_original_dts_file(self, dts_original_path: str) -> None:
         """
@@ -459,6 +504,7 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
         "arch": arch,
         "platform_full_name": platform_full_name,
         "board_dir": '/'.join(board_dir.split('/')[2:]),  # Drop 'zephyrproject/zephyr' from the path
+        "memory": run.get_memory_usage(),
     }
 
     info = "Success!" if run.success else "Fail!"

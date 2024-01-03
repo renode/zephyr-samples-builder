@@ -43,3 +43,4 @@ The `result.json` file consists the following keys:
 * `zephyr_sha`: SHA of the Zephyr version used for the build.
 * `zephyr_sdk`: Zephyr SDK version used for the build.
 * `board_dir`: Board directory in Zephyr tree.
+* `memory`: Memory size and usage.
