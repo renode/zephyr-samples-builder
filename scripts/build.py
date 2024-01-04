@@ -181,19 +181,14 @@ class SampleBuilder:
 
         # Check if flash size was increased
         if "memory" in self.overlays:
-            if 'FLASH' in memory:
-                _, flash_size = find_node_size('flash', self.dts_original)
-                flash_size = int(flash_size[-1], 16)
-                memory['FLASH'].update({
-                    'size': flash_size,
-                })
-
-            if 'RAM' in memory:
-                _, ram_size = find_node_size('sram', self.dts_original)
-                ram_size = int(ram_size[-1], 16)
-                memory['RAM'].update({
-                    'size': ram_size,
-                })
+            for type in ['FLASH', 'RAM']:
+                if type in memory:
+                    node_name = self._get_alternative_node_name(type, self.dts_original)
+                    _, node_size = find_node_size(node_name, self.dts_original)
+                    node_size = int(node_size[-1], 16)
+                    memory[type].update({
+                        'size': node_size,
+                    })
 
         return memory
 
