@@ -278,6 +278,31 @@ class SampleBuilder:
 
             return failed, output
 
+    def _get_alternative_node_name(self, node_name: str, dts_filename: str) -> str:
+        """
+            Linker script errors do not match the DTS entries, so we patch them when required.
+            ! This heurestic may be too naive for some cases !
+            Reference for the names: search for `overflowed by` in `scripts/pylib/twister/twisterlib/runner.py`
+            in Zephyr, it also parses the linker output.
+
+            Parameters:
+            node_name (str): Memory node to be extended.
+            dts_filename (str): Path to the DTS file.
+
+            Returns:
+            str: An patched node name, original name if not found
+        """
+        alternative_names = {
+            "ram": "sram",
+            "rom": "flash",
+            "dram0_1_seg": "ipmmem0",
+            "iccm": "iccm0",
+            "dccm": "dccm0",
+        }
+        node_name = node_name.lower()
+        alternative = alternative_names.get(node_name, node_name)
+        return alternative if find_node_size(node_name, dts_filename) is None else node_name
+
     def _prepare_node_entries(self, west_output, dts_filename):
         """
         Prepares memory node entries based on west errors and the DTS file.
@@ -298,21 +323,7 @@ class SampleBuilder:
         sizes = {}
         for m in occurrences:
             log_node_name = m[0]
-            node_name = log_node_name.lower()
-            # linker script errors do not match the DTS entries, so we patch them when required
-            # this heurestic may be too naive for some cases
-            # reference for the names: search for `overflowed by` in `scripts/pylib/twister/twisterlib/runner.py`
-            # in Zephyr, it also parses the linker output
-            alternative_names = {
-                "ram": "sram",
-                "rom": "flash",
-                "dram0_1_seg": "ipmmem0",
-                "iccm": "iccm0",
-                "dccm": "dccm0",
-            }
-            alternative = alternative_names.get(node_name, node_name)
-            node_name = alternative if find_node_size(node_name, dts_filename) is None else node_name
-
+            node_name = self._get_alternative_node_name(log_node_name.lower(), dts_filename)
             decoded_node_name, decoded_node_base, decoded_node_size = decode_node(node_name, dts_filename)
             if decoded_node_name is None:
                 print(f"No node {node_name} found when trying to resize it")
