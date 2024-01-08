@@ -15,6 +15,8 @@ from argparse import ArgumentParser
 import config
 from common import (
     bold,
+    green,
+    red,
     create_zip_archive,
     find_node_size,
     decode_node,
@@ -114,7 +116,8 @@ class SampleBuilder:
             self._check_extend_memory(west_output)
 
         arifacts = self.get_artifacts()
-        self.success = "elf" in arifacts
+
+        self.success = ("elf" in arifacts) and self._check_kconfig_requirements()
 
         return arifacts
 
@@ -420,6 +423,35 @@ class SampleBuilder:
             self.overlays["memory"] = overlay_path
             fail, west_output = self._build()
 
+    def _check_kconfig_requirements(self):
+        """
+        Check if the config file generated for this board has symbols set to the
+        required status.
+        """
+        ret = True
+
+        try:
+            symbols = self.config.samples[self.sample_name]['kconfig']
+        except KeyError:
+            # There are no requirements for this sample.
+            return ret
+
+        zephyr_config_file = self.get_artifacts()["config"]
+
+        with open(zephyr_config_file) as f:
+            zephyr_config = f.read().splitlines()
+
+        for symbol in symbols:
+            print(f"Checking for {bold(symbol)} in {bold(zephyr_config_file)}... ", end="")
+            for l in zephyr_config:
+                if l == symbol:
+                    print(bold(green("Found!")))
+                    break
+            else:
+                print(bold(red("Not found!")))
+                ret = False
+
+        return ret
 
 def get_full_name(yaml_data):
     full_board_name = yaml_data['name']

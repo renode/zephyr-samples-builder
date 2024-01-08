@@ -5,7 +5,7 @@ import os
 import yaml
 import zipfile
 import hashlib
-from colorama import Style
+from colorama import Fore, Style
 import config
 
 
@@ -20,6 +20,20 @@ def bold(text: str) -> str:
         str: The input text with bold formatting.
     """
     return Style.BRIGHT + (text or "") + Style.RESET_ALL
+
+
+def red(text):
+    """
+    Apply red color to the provided text.
+    """
+    return Fore.RED + (text or "") + Style.RESET_ALL
+
+
+def green(text):
+    """
+    Apply green color to the provided text.
+    """
+    return Fore.GREEN + (text or "") + Style.RESET_ALL
 
 
 def get_sample_path(sample_name: str) -> str:
