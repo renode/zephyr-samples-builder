@@ -245,7 +245,6 @@ jobs:
         run: |
           source .env
           ./scripts/generate_summary.py -c zephyr.yaml >> $GITHUB_STEP_SUMMARY
-          ./scripts/generate_diff.py -c zephyr.yaml
 
       - id: gcp-auth
         if: ${{github.event_name == 'push' && github.ref == 'refs/heads/main'}}
