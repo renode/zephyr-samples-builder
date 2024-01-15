@@ -29,6 +29,8 @@ samples:
     path: "basic/blinky"
   hello_world_user:
     path: "userspace/hello_world_user"
+    kconfig:
+      - 'CONFIG_USERSPACE=y'
   synchronization:
     path: "synchronization"
   lz4:
