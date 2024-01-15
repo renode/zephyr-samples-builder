@@ -64,7 +64,11 @@ def main() -> None:
     with open("build/result.json", "r") as f:
         local_results = json.load(f)
 
-    remote_results = get_remote_json()
+    try:
+        remote_results = get_remote_json()
+    except Exception as e:
+        print(f'Failed to get remote JSON, quitting!\n{e}')
+        exit(0)
 
     for sample in config.samples:
         changed, added, removed = json_sample_diff(sample, remote_results, local_results)
