@@ -273,6 +273,7 @@ class SampleBuilder:
                 f"samples/{self.sample_path} "
                 f"{build_args} "
                 f"{'--pristine' if pristine else ''} "
+                "-DCONFIG_BUILD_OUTPUT_META=y "  # Since Zephyr 7bde51b this config must be enabled to generate spdx files
             ).strip()
 
             if prepare_only:
