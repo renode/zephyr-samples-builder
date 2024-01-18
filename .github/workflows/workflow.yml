@@ -1,5 +1,21 @@
 name: Build
-on: [push]
+run-name: >
+  ${{ github.event_name == 'workflow_dispatch' &&
+        format('{0}{1}',
+          'Build',
+          (github.event.inputs.zephyr_version && format(' Zephyr: {0}', github.event.inputs.zephyr_version ) || '')
+        )
+      || ''
+  }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      zephyr_version:
+        description: "Full SHA of Zephyr commit to be used."
+        required: true
+        default: ''
+  push:
 
 env:
   MATRIX_RUNNERS: 16  # do not saturate runner pool
@@ -13,6 +29,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Handle manually-triggered workflows
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        env:
+          ZEPHYR_VERSION_OVERRIDE: ${{github.event.inputs.zephyr_version}}
+        run: |
+          echo "selected version: $ZEPHYR_VERSION_OVERRIDE"
+          sed -i "/ZEPHYR_VERSION=/c\export ZEPHYR_VERSION=$ZEPHYR_VERSION_OVERRIDE" .env
+
       - name: Prepare Zephyr Enviroment
         run: |
           # Basic git config to apply patches
