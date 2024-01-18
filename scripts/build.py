@@ -266,7 +266,15 @@ class SampleBuilder:
                 shutil.rmtree(self.temp_dir_path)
 
             # Build the sample in the `temp_dir_path`
-            build_command = f"west build -b {self.platform} -d {self.temp_dir_path} samples/{self.sample_path} {build_args} {'--pristine' if pristine else ''}".strip()
+            build_command = (
+                "west build "
+                f"-b {self.platform} "
+                f"-d {self.temp_dir_path} "
+                f"samples/{self.sample_path} "
+                f"{build_args} "
+                f"{'--pristine' if pristine else ''} "
+            ).strip()
+
             if prepare_only:
                 failed, output = self._run_command(f"{build_command} --cmake-only")
             else:
