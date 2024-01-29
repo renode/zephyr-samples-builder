@@ -167,7 +167,7 @@ jobs:
           gsutil -m rsync -r build/ gs://zephyr-samples-builder/zephyr/$ZEPHYR_VERSION
 
   Update-version-info:
-    needs: Build
+    needs: Print-status
     runs-on: ubuntu-latest
     if: ${{github.event_name == 'push' && github.ref == 'refs/heads/main'}}
     concurrency: update_version_info
