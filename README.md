@@ -45,3 +45,11 @@ The `result.json` file consists the following keys:
 * `board_dir`: Board directory in Zephyr tree.
 * `memory`: Memory size and usage.
 * `dts_include_chain`: Device Tree include chain.
+
+## Requesting a build for a specific version of Zephyr
+
+The `gh` tool can be used to trigger a workflow with a hash provided as argument:
+
+	gh workflow run Build --ref main -f zephyr_version=8873c0784772413ee521abae4b9129dd7cd9e3ee
+
+A full hash representing a commit in the Zephyr repository must be provided.
