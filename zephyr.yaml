@@ -37,3 +37,5 @@ samples:
     path: "compression/lz4"
   rust-app:
     path: "../zephyr-rust/samples/rust-app"
+    kconfig:
+      - 'CONFIG_USERSPACE=y'
