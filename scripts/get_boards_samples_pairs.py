@@ -13,17 +13,28 @@ def get_boards() -> list:
     Returns:
         list: A filtered list of pairs (arch, board).
     """
+
     # the Zephyr utility has its own argument parsing, so avoid args clash
     sys.path.append(f"{config.project_path}/scripts")
-    from list_boards import find_arch2boards
+    import list_boards
     from pathlib import Path
 
     class Args:
         arch_roots = [Path(config.project_path)]
         board_roots = [Path(config.project_path)]
+        soc_roots = [Path(config.project_path)]
+        name_re = None
+        board = None
+        board_dir = None
 
-    zephyr_boards = find_arch2boards(Args())
-    boards_to_run = flatten(zephyr_boards).values()
+    boards_to_run = list_boards.find_boards(Args())
+    if 'find_v2_boards' in dir(list_boards):
+        # hardware model v2
+        boards_to_run += list_boards.find_v2_boards(Args())
+    else:
+        # hardware model v1
+        print("Warning: 'find_v2_boards' wasn't found. Your Zephyr might be too old for this builder.",
+              file=sys.stderr)
 
     omit_arch = ("posix",)
     boards_to_run = filter(lambda x: x.arch not in omit_arch, boards_to_run)
