@@ -88,6 +88,16 @@ jobs:
             micropython/
             boards_sample_pairs
 
+      - name: Increase build space
+        run: |
+          echo "Before cleanup"
+          df -H
+          sudo rm -rf /usr/share/dotnet/*
+          sudo rm -rf /usr/local/lib/android/*
+          sudo rm -rf /opt/ghc/*
+          echo "After cleanup"
+          df -H
+
       - name: Prepare build environment
         run: |
           source .env
