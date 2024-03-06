@@ -20,6 +20,7 @@ git init > /dev/null 2> /dev/null
 git remote add origin https://github.com/zephyrproject-rtos/zephyr
 git pull --depth 1 origin ${ZEPHYR_VERSION} > /dev/null 2> /dev/null
 
+# Prepare zephyr-rust application
 mkdir -p zephyr-rust
 cd zephyr-rust
 git init > /dev/null 2> /dev/null
@@ -54,4 +55,25 @@ done
 
 west zephyr-export
 cd ..
+
+# Prepare Kenning Zephyr Runtime Demo application
+# This demo uses a custom workspace (west.yaml configuration)
+mkdir -p kenning-zephyr-workspace/kenning-zephyr-runtime 
+cd kenning-zephyr-workspace/kenning-zephyr-runtime
+git init > /dev/null 2> /dev/null
+git remote add origin https://github.com/antmicro/kenning-zephyr-runtime
+git pull --depth 1 origin ${KENNING_ZEPHYR_RUNTIME_VERSION} > /dev/null 2> /dev/null
+
+# Initialize another zephyr workspace
+west init -l .
+west update
+west zephyr-export
+
+# Prepare required modules
+./scripts/prepare_modules.sh
+
+# Checkout proper Zephyr version for the kenning samples
+cd ../zephyr
+git checkout $ZEPHYR_VERSION
+cd ../..
 

@@ -1,4 +1,5 @@
 micropython/
+kenning-zephyr-workspace/
 scripts/__pycache__/
 zephyr-sdk/
 zephyrproject/

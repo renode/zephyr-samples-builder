@@ -71,6 +71,7 @@ jobs:
           key: ${{ runner.os }}-build-${{ github.run_id }}
           path: |
             zephyrproject/
+            kenning-zephyr-workspace/
             zephyr-sdk/
             micropython/
             boards_sample_pairs
@@ -104,6 +105,7 @@ jobs:
           fail-on-cache-miss: true
           path: |
             zephyrproject/
+            kenning-zephyr-workspace/
             zephyr-sdk/
             micropython/
             boards_sample_pairs
