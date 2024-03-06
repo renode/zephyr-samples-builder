@@ -30,6 +30,7 @@ from common import (
     conv_zephyr_mem_usage,
     get_dts_include_chain,
     sanitize_upper,
+    get_sample_workspace,
 )
 
 templateLoader = jinja2.FileSystemLoader(searchpath="./")
@@ -52,12 +53,13 @@ class YAMLNotFoundException(Exception):
 
 
 class SampleBuilder:
-    def __init__(self, platform: str, sample_path: str, sample_name: str) -> None:
+    def __init__(self, platform: str, sample_path: str, sample_name: str, sample_workspace: str | None) -> None:
         # Parameters
         self.platform = platform
         self.config = config
         self.sample_path = sample_path
         self.sample_name = sample_name
+        self.sample_workspace = self.config.project_path if sample_workspace is None else sample_workspace
 
         self.args = {}
         self.overlays = {}
@@ -257,7 +259,7 @@ class SampleBuilder:
 
         with remember_cwd():
             # Enter Zephyr directory
-            os.chdir(self.config.project_path)
+            os.chdir(self.sample_workspace)
 
             # Concentrate overlay and base args
             build_args = (' '.join(list(self.args.values())) if self.args else '') + (' -DDTC_OVERLAY_FILE=' + ';'.join(list(self.overlays.values())) if self.overlays and not disable_overlays else '')
@@ -518,10 +520,11 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
         sample_name (str): The name of the sample being built
     """
     sample_path = get_sample_path(sample_name)
+    sample_workspace = get_sample_workspace(sample_name)
     config_path = f'configs/{sample_name}.conf'
     overlay_path = f'overlays/{board_name}.overlay'
 
-    run = SampleBuilder(board_name, sample_path, sample_name)
+    run = SampleBuilder(board_name, sample_path, sample_name, sample_workspace)
 
     # Check for sample prj.conf overlay
     if os.path.exists(config_path):

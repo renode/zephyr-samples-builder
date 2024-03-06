@@ -46,7 +46,24 @@ def get_sample_path(sample_name: str) -> str:
     Returns:
         str: The path of the specified sample.
     """
-    return config.samples[sample_name]["path"]
+    if workspace := get_sample_workspace(sample_name):
+        return os.path.realpath(f'{workspace}/{config.samples[sample_name]["path"]}')
+    else:
+        return os.path.realpath(f'{config.project_path}/{config.samples[sample_name]["path"]}')
+
+
+
+def get_sample_workspace(sample_name: str) -> str | None:
+    """
+    Retrieve the sample workspace location.
+
+    Args:
+        sample_name (str): The name of the sample.
+
+    Returns:
+        Optional[str]: The Zephyr's workspace path, None if the key is empty.
+    """
+    return config.samples[sample_name].get("workspace", None)
 
 
 def find_node_size(node: str, dts_filename: str):
