@@ -66,6 +66,19 @@ def get_sample_workspace(sample_name: str) -> str | None:
     return config.samples[sample_name].get("workspace", None)
 
 
+def get_sample_extra_args(sample_name: str) -> str | None:
+    """
+    Retrieve the sample extra arguments.
+
+    Args:
+        sample_name (str): The name of the sample.
+
+    Returns:
+        Optional[str]: Sample extra arguments, None if the key is empty.
+    """
+    return config.samples[sample_name].get("extra_args", None)
+
+
 def find_node_size(node: str, dts_filename: str):
     """
     Find the size of a specific node in a DTS file.

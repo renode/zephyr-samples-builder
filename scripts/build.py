@@ -31,6 +31,7 @@ from common import (
     get_dts_include_chain,
     sanitize_upper,
     get_sample_workspace,
+    get_sample_extra_args,
 )
 
 templateLoader = jinja2.FileSystemLoader(searchpath="./")
@@ -521,6 +522,7 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
     """
     sample_path = get_sample_path(sample_name)
     sample_workspace = get_sample_workspace(sample_name)
+    sample_extra_args = get_sample_extra_args(sample_name)
     config_path = f'configs/{sample_name}.conf'
     overlay_path = f'overlays/{board_name}.overlay'
 
@@ -529,6 +531,9 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
     # Check for sample prj.conf overlay
     if os.path.exists(config_path):
         run.args["config"] = f'-DCONF_FILE={os.path.realpath(config_path)}'
+
+    if sample_extra_args:
+        run.args["extra_args"] = sample_extra_args
 
     # Check for board specific overlay file
     # This also necessitates a generation of an original DTS file
