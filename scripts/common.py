@@ -188,7 +188,7 @@ def get_versions() -> dict:
     }
 
 
-def zephyr_config_to_list(config_path: str) -> list:
+def zephyr_config_to_list(config_path: str) -> list | None:
     """
     Convert a Zephyr configuration file to a list of strings.
 
@@ -196,10 +196,14 @@ def zephyr_config_to_list(config_path: str) -> list:
         config_path (str): The path to the Zephyr configuration file.
 
     Returns:
-        list: A list of non-commented lines from the configuration file.
+        Optional[list]: A list of non-commented lines from the configuration file,
+                        None if file doesn't exist.
     """
-    with open(config_path, 'r') as cfg:
-        return [line.strip() for line in cfg if line.strip() and not line.startswith('#')]
+    if os.path.exists(config_path):
+        with open(config_path, 'r') as cfg:
+            return [line.strip() for line in cfg if line.strip() and not line.startswith('#')]
+    else:
+        return None
 
 
 def get_yaml_data(yaml_filename: str):
