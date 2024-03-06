@@ -13,29 +13,28 @@ artifact_names:
   zip-sbom:    "{sample_name}-sbom.zip"
   result:      "{sample_name}-result.json"
 
-# The path is relative to `zephyr/samples`
 samples:
   hello_world:
-    path: "hello_world"
+    path: "samples/hello_world"
   philosophers:
-    path: "philosophers"
+    path: "samples/philosophers"
   shell_module:
-    path: "subsys/shell/shell_module"
+    path: "samples/subsys/shell/shell_module"
   tensorflow_lite_micro:
-    path: "modules/tflite-micro/hello_world"
+    path: "samples/modules/tflite-micro/hello_world"
   micropython:
-    path: "../../../micropython/ports/zephyr"
+    path: "samples/../../../micropython/ports/zephyr"
   blinky:
-    path: "basic/blinky"
+    path: "samples/basic/blinky"
   hello_world_user:
-    path: "userspace/hello_world_user"
+    path: "samples/userspace/hello_world_user"
     kconfig:
       - 'CONFIG_USERSPACE=y'
   synchronization:
-    path: "synchronization"
+    path: "samples/synchronization"
   lz4:
-    path: "compression/lz4"
+    path: "samples/compression/lz4"
   rust-app:
-    path: "../zephyr-rust/samples/rust-app"
+    path: "samples/../zephyr-rust/samples/rust-app"
     kconfig:
       - 'CONFIG_USERSPACE=y'
