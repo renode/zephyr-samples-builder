@@ -37,6 +37,16 @@ jobs:
           echo "selected version: $ZEPHYR_VERSION_OVERRIDE"
           sed -i "/ZEPHYR_VERSION=/c\export ZEPHYR_VERSION=$ZEPHYR_VERSION_OVERRIDE" .env
 
+      - name: Increase build space
+        run: |
+          echo "Before cleanup"
+          df -H
+          sudo rm -rf /usr/share/dotnet/*
+          sudo rm -rf /usr/local/lib/android/*
+          sudo rm -rf /opt/ghc/*
+          echo "After cleanup"
+          df -H
+
       - name: Prepare Zephyr Enviroment
         run: |
           # Basic git config to apply patches
@@ -77,6 +87,16 @@ jobs:
       id-token: write
 
     steps:
+      - name: Increase build space
+        run: |
+          echo "Before cleanup"
+          df -H
+          sudo rm -rf /usr/share/dotnet/*
+          sudo rm -rf /usr/local/lib/android/*
+          sudo rm -rf /opt/ghc/*
+          echo "After cleanup"
+          df -H
+
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
@@ -87,16 +107,6 @@ jobs:
             zephyr-sdk/
             micropython/
             boards_sample_pairs
-
-      - name: Increase build space
-        run: |
-          echo "Before cleanup"
-          df -H
-          sudo rm -rf /usr/share/dotnet/*
-          sudo rm -rf /usr/local/lib/android/*
-          sudo rm -rf /opt/ghc/*
-          echo "After cleanup"
-          df -H
 
       - name: Prepare build environment
         run: |
