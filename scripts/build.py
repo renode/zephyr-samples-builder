@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import tempfile
 import time
+import yaml
 import contextlib
 from typing import Tuple
 from argparse import ArgumentParser
@@ -43,6 +44,10 @@ def remember_cwd():
         yield
     finally:
         os.chdir(curdir)
+
+
+class YAMLNotFoundException(Exception):
+    pass
 
 
 class SampleBuilder:
@@ -469,6 +474,30 @@ def get_full_name(yaml_data):
     return full_board_name
 
 
+def get_board_yaml_path_by_identifier(board_dir: str, board_name: str) -> str:
+    """
+    Attempt to parse all .yaml files inside `board_dir`.
+    If any yaml file identifier matches the board_name -> return yaml file location,
+    In case no matches are made, raise YAMLNotFoundException.
+    """
+    print(f'board_dir: {board_dir}, board_name: {board_name}')
+    for root, dirs, files in os.walk(board_dir):
+        for file in files:
+            if file.endswith('.yaml'):
+                file_path = os.path.join(root, file)
+                with open(file_path, 'r') as f:
+                    try:
+                        data = yaml.safe_load(f)
+                        if data['identifier'] == board_name:
+                            return file_path
+                    except yaml.YAMLError as e:
+                        print(f"Error reading {file_path}: {e}")
+                    except KeyError as e:
+                        print(f"No identifier key in: {file_path}: {e}")
+
+    raise YAMLNotFoundException
+
+
 def get_board_yaml_path(board_dir, board_name):
     yamlpath = f'{board_dir}/{board_name}.yaml'
 
@@ -537,7 +566,12 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
     elf_name = config.artifact_paths["elf"].format(**format_args)
     elf_md5_name = config.artifact_paths["elf-md5"].format(**format_args)
 
-    board_yaml_data = get_yaml_data(get_board_yaml_path(board_dir, board_name))
+    try:
+        board_yaml_data = get_yaml_data(get_board_yaml_path_by_identifier(board_dir, board_name))
+    except YAMLNotFoundException:
+        print(bold(f"Skipping target due to missing YAML file: {board_name}"))
+        return
+
     platform_full_name = get_full_name(board_yaml_data)
     arch = board_yaml_data["arch"]
 
