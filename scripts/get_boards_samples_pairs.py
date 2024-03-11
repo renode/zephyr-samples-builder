@@ -1,49 +1,8 @@
 #!/usr/bin/env python3
 
-import sys
+import os
+import yaml
 import config
-from common import flatten
-
-
-def get_boards() -> list:
-    """
-    Get a list of boards from the Zephyr project.
-    Virtual and posix platforms (apart from QEMU) are filtered out.
-
-    Returns:
-        list: A filtered list of pairs (arch, board).
-    """
-
-    # the Zephyr utility has its own argument parsing, so avoid args clash
-    sys.path.append(f"{config.project_path}/scripts")
-    import list_boards
-    from pathlib import Path
-
-    class Args:
-        arch_roots = [Path(config.project_path)]
-        board_roots = [Path(config.project_path)]
-        soc_roots = [Path(config.project_path)]
-        name_re = None
-        board = None
-        board_dir = None
-
-    boards_to_run = list_boards.find_boards(Args())
-    if 'find_v2_boards' in dir(list_boards):
-        # hardware model v2
-        boards_to_run += list_boards.find_v2_boards(Args())
-    else:
-        # hardware model v1
-        print("Warning: 'find_v2_boards' wasn't found. Your Zephyr might be too old for this builder.",
-              file=sys.stderr)
-
-    omit_arch = ("posix",)
-    boards_to_run = filter(lambda x: x.arch not in omit_arch, boards_to_run)
-
-    # Do not build for simulation targets (apart from QEMU).
-    omit_board = ("nsim", "xenvm", "xt-sim", "fvp_")
-    boards_to_run = list(filter(lambda x: all(map(lambda y: y not in x.name, omit_board)), boards_to_run))
-
-    return [(board.dir, board.name) for board in boards_to_run]
 
 
 def generate_samples() -> None:
@@ -60,6 +19,44 @@ def generate_samples() -> None:
             if board in sample_boards:
                 print(f"{dir} {board} {sample}")
 
+
+def get_yaml_identifiers(directory: str, suppress_output=True) -> dict:
+    def dprint(*a, **k):
+        if not suppress_output:
+            print(*a, **k)
+
+    all_boards = {}
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file.endswith('.yaml'):
+                file_path = os.path.join(root, file)
+                with open(file_path, 'r') as f:
+                    try:
+                        data = yaml.safe_load(f)
+                        all_boards[data['identifier']] = root
+                    except yaml.YAMLError as e:
+                        dprint(f"Error reading {file_path}: {e}")
+                    except KeyError as e:
+                        dprint(f"No identifier key in: {file_path}: {e}")
+    return all_boards
+
+
+def generate_samples_from_yaml() -> None:
+    """
+    Generate combinations of boards and samples based on configuration file
+
+    If sample has defined 'boards' key, only generate the samples for given boards,
+    otherwise generate the sample for all boards
+    """
+    directory_path = f'{config.project_path}/boards'
+    identifiers = get_yaml_identifiers(directory_path)
+    for board, dir in identifiers.items():
+        for sample, sample_data in config.samples.items():
+            sample_boards = sample_data.get("boards", [board])
+            if board in sample_boards:
+                print(f"{dir} {board} {sample}")
+
+
 if __name__ == "__main__":
     config.load()
-    generate_samples()
+    generate_samples_from_yaml()
