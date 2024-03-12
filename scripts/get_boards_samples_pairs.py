@@ -5,21 +5,6 @@ import yaml
 import config
 
 
-def generate_samples() -> None:
-    """
-    Generate combinations of boards and samples based on configuration file
-
-    If sample has defined 'boards' key, only generate the samples for given boards,
-    otherwise generate the sample for all boards
-    """
-    all_boards_data = get_boards()
-    for dir, board in all_boards_data:
-        for sample, sample_data in config.samples.items():
-            sample_boards = sample_data.get("boards", [board])
-            if board in sample_boards:
-                print(f"{dir} {board} {sample}")
-
-
 def get_yaml_identifiers(directory: str, suppress_output=True) -> dict:
     def dprint(*a, **k):
         if not suppress_output:
