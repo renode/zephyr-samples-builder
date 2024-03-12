@@ -5,7 +5,7 @@ import yaml
 import config
 
 
-def get_yaml_identifiers(directory: str, suppress_output: bool = True) -> dict:
+def get_yaml_identifiers(directory: str, filter_archs: list | None = None, filter_targets: list | None = None, suppress_output=True) -> dict:
     def dprint(*a, **k):
         if not suppress_output:
             print(*a, **k)
@@ -18,11 +18,16 @@ def get_yaml_identifiers(directory: str, suppress_output: bool = True) -> dict:
                 with open(file_path, 'r') as f:
                     try:
                         data = yaml.safe_load(f)
-                        all_boards[data['identifier']] = root
+                        identifier = data['identifier']
+                        if filter_archs and data['arch'] in filter_archs:
+                            continue
+                        if filter_targets and any(target in identifier for target in filter_targets):
+                            continue
+                        all_boards[identifier] = root
                     except yaml.YAMLError as e:
                         dprint(f"Error reading {file_path}: {e}")
                     except KeyError as e:
-                        dprint(f"No identifier key in: {file_path}: {e}")
+                        dprint(f"KeyError in: {file_path}: {e}")
     return all_boards
 
 
@@ -33,8 +38,10 @@ def generate_samples_from_yaml() -> None:
     If sample has defined 'boards' key, only generate the samples for given boards,
     otherwise generate the sample for all boards
     """
+    omit_arch = ["posix"]
+    omit_target = ["nsim", "xenvm", "xt-sim", "fvp_"]
     directory_path = f'{config.project_path}/boards'
-    identifiers = get_yaml_identifiers(directory_path)
+    identifiers = get_yaml_identifiers(directory_path, omit_arch, omit_target)
     for board, dir in identifiers.items():
         for sample, sample_data in config.samples.items():
             sample_boards = sample_data.get("boards", [board])
