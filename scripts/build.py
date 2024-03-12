@@ -536,7 +536,9 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
     artifacts = run.build_sample()
 
     # Template used for naming arfitacts
-    project_sample_name = f"{board_name}/{sample_name}"
+    # Use sanitized `board_name` for the folder structure and artifact names
+    board_name_sanitized = sanitize_upper(board_name)
+    project_sample_name = f"{board_name_sanitized}/{sample_name}"
 
     # Create artifacts location
     os.makedirs(f"build/{project_sample_name}", exist_ok=True)
@@ -560,7 +562,7 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
             shutil.copyfile(path, f"build/{project_sample_name}/{sample_name}-config")
 
     format_args = {
-        "board_name": board_name,
+        "board_name": board_name_sanitized,
         "sample_name": sample_name,
     }
 
@@ -577,7 +579,7 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
     arch = board_yaml_data["arch"]
 
     result = {
-        "platform": sanitize_upper(board_name),
+        "platform": board_name_sanitized,
         "platform_original": board_name,
         "sample_name": sample_name,
         "success": run.success,
