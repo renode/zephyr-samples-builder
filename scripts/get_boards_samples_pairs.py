@@ -5,7 +5,7 @@ import yaml
 import config
 
 
-def get_yaml_identifiers(directory: str, suppress_output=True) -> dict:
+def get_yaml_identifiers(directory: str, suppress_output: bool = True) -> dict:
     def dprint(*a, **k):
         if not suppress_output:
             print(*a, **k)
