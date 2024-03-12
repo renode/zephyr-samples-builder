@@ -29,6 +29,7 @@ from common import (
     calculate_md5,
     conv_zephyr_mem_usage,
     get_dts_include_chain,
+    sanitize_upper,
 )
 
 templateLoader = jinja2.FileSystemLoader(searchpath="./")
@@ -576,7 +577,8 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
     arch = board_yaml_data["arch"]
 
     result = {
-        "platform": board_name,
+        "platform": sanitize_upper(board_name),
+        "platform_original": board_name,
         "sample_name": sample_name,
         "success": run.success,
         "extended_memory": "memory" in run.overlays,

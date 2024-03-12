@@ -253,3 +253,19 @@ def get_dts_include_chain(arch: str, dts_filename: str, chain=[]) -> list:
                     dtsi_filename = f'{config.project_path}/dts/{arch}/{next_include}'
                 return get_dts_include_chain(arch, dtsi_filename, chain + [name])
     return chain
+
+
+def sanitize_upper(string: str) -> str:
+    """
+    Sanitize the string, so that the string only contains alpha-numeric
+    characters or underscores. All non-alpha-numeric characters are replaced
+    with an underscore, '_'.
+    When string has been sanitized it will be converted into upper case.
+
+    Args:
+        string(str): The string to sanitize.
+
+    Returns:
+        str: Sanitized and upper-cased string.
+    """
+    return re.sub(r'[^a-zA-Z0-9_]', '_', string).upper()
