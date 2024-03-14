@@ -1,7 +1,7 @@
-From 9e659c5e29365fe83d73cdcb4309a9cc39852825 Mon Sep 17 00:00:00 2001
+From 647cd4480aaaf279d229e135b75c9b05b18f7c2a Mon Sep 17 00:00:00 2001
 From: Mateusz Sierszulski <msierszulski@antmicro.com>
 Date: Mon, 4 Dec 2023 16:25:59 +0100
-Subject: [PATCH] Add support for Zephyr 3.5.0
+Subject: [PATCH 1/2] Add support for Zephyr 3.5.0
 
 ---
  rust/zephyr-core/build.rs      | 3 +++
@@ -73,5 +73,5 @@ index 90c9dea..bf63be6 100755
              continue
          include = "syscalls/%s" % fn
 -- 
-2.30.2
+2.43.0
 
