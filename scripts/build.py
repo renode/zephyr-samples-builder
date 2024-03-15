@@ -123,11 +123,11 @@ class SampleBuilder:
         fail, west_output = self._build()
 
         if fail:
-            self._check_extend_memory(west_output)
+            fail = self._check_extend_memory(west_output)
 
         arifacts = self.get_artifacts()
 
-        self.success = ("elf" in arifacts) and self._check_kconfig_requirements()
+        self.success = (not fail) and ("elf" in arifacts) and self._check_kconfig_requirements()
 
         return arifacts
 
@@ -376,27 +376,30 @@ class SampleBuilder:
             f.flush()
             return f.name
 
-    def _check_extend_memory(self, west_output: str) -> None:
+    def _check_extend_memory(self, west_output: str) -> bool:
         """
             Check and extend memory node size if necessary for a given run.
 
             Args:
             west_output (str): The output of the west build tool
+
+            Returns:
+            boolean indicating build success (True if failed)
         """
         dts_filename = self.get_artifacts().get("dts", None)
         if not dts_filename:
             print("Build failed. DTS file is not present. Aborting!")
-            return
+            return True
 
         arch_err = re.findall(self._ARCH_ERROR_REGEX, west_output)
         if arch_err:
             print("Build failed. Arch not supported. Aborting!")
-            return
+            return True
 
         sizes = self._prepare_node_entries(west_output, dts_filename)
         if not sizes:
             print("Build failed. Size is not the issue. Aborting!")
-            return
+            return True
 
         # we're out of memory. We'll try to increase all detected regions at once, but we'll repeat until:
         # - binary links successfully
@@ -404,22 +407,24 @@ class SampleBuilder:
         last_occurrences = []
         fail = True
         while fail:
+
             occurrences = re.findall(self._MEMORY_EXTENSION_REGEX, west_output)
 
             n_sizes = self._prepare_node_entries(west_output, dts_filename)
             if not n_sizes:
                 print("Build failed. Size is not the issue. Aborting!")
-                return
+                return True
 
             sizes.update(n_sizes)
 
             if occurrences == []:
                 print(f"Build failed. Attempted node size increases: {sizes}. Aborting!")
-                return
+                return True
 
             if last_occurrences == occurrences:
                 print("Resizing didn't change any value in linker output. Failing!")
-                return
+                return True
+
             last_occurrences = occurrences
 
             # increase sizes required in this run
@@ -441,6 +446,8 @@ class SampleBuilder:
             # append the overlay file to the SampleBuilder
             self.overlays["memory"] = overlay_path
             fail, west_output = self._build()
+
+        return fail
 
     def _check_kconfig_requirements(self):
         """
