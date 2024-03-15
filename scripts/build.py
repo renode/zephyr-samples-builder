@@ -30,6 +30,7 @@ from common import (
     conv_zephyr_mem_usage,
     get_dts_include_chain,
     sanitize_lower,
+    identifier_get_revision,
     get_sample_workspace,
     get_sample_extra_args,
     get_dts_by_identifier,
@@ -574,6 +575,7 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
     # Template used for naming arfitacts
     # Use sanitized `board_name` for the folder structure and artifact names
     board_name_sanitized = sanitize_lower(board_name)
+    revision = identifier_get_revision(board_name)
     project_sample_name = f"{board_name_sanitized}/{sample_name}"
 
     # Create artifacts location
@@ -635,6 +637,7 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
         "memory": run.get_memory_usage(),
         "dts_include_chain": dts_include_chain,
         "arch_bits" : run.arch_bits,
+        "platform_revision": revision,
     }
 
     info = "Success!" if run.success else "Fail!"

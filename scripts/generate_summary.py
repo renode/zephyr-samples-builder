@@ -97,9 +97,26 @@ def collective_json_result(aggregated_results: list) -> str:
     Process aggregated build result into a single JSON organized by board names.
     """
     collective = dict()
+
+    # Find duplicated board names.
+    names = set()
+    duplicates = set()
+    for result in aggregated_results:
+        if result["sample_name"] != "hello_world":
+            continue
+        name = result["platform_full_name"]
+        if name in names:
+            duplicates.add(name)
+        names.add(name)
+    del names
+
     for result in aggregated_results:
         sample_name = result["sample_name"]
         platform = result["platform"]
+
+        # If the pretty name is not unique, append its revision.
+        if result["platform_full_name"] in duplicates:
+            result["platform_full_name"] += ' ' + (result.get("platform_revision") or '')
 
         if platform not in collective:
             collective[platform] = dict(

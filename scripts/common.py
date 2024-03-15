@@ -274,6 +274,14 @@ def identifier_drop_revision(identifier: str) -> str:
         else:
             return board_path
 
+def identifier_get_revision(identifier: str) -> str:
+    """
+    Retrieve the revision from target name or empty string if no revision is specified.
+    """
+    match = re.match(r'^(?:[^@/]+)(@[^/]+)?(?:/([^@]+))?$', identifier)
+    if match and match.group(1):
+        return match.group(1)[1:]
+    return ''
 
 def identifier_get_substrings(identifier: str) -> list:
     """
