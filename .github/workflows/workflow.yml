@@ -65,16 +65,18 @@ jobs:
           echo "matrix=`./scripts/generate_matrix.py`" >> $GITHUB_OUTPUT
           ls -lah
 
-      - name: Cache Environment
-        uses: actions/cache@v4
+      - name: Create .tar.gz archive of the environment
+        run: |
+          tar czf env.tar.gz zephyrproject/ kenning-zephyr-workspace/ zephyr-sdk/ micropython/ boards_sample_pairs
+
+      - name: Upload environment artifact
+        uses: actions/upload-artifact@v4
         with:
-          key: ${{ runner.os }}-build-${{ github.run_id }}
+          name: 'zephyr_env'
+          retention-days: 3
+          if-no-files-found: error
           path: |
-            zephyrproject/
-            kenning-zephyr-workspace/
-            zephyr-sdk/
-            micropython/
-            boards_sample_pairs
+            env.tar.gz
 
   Build:
     needs: Prepare-Workload
@@ -99,16 +101,15 @@ jobs:
           df -H
 
       - uses: actions/checkout@v3
-      - uses: actions/cache@v4
+      - name: Download environment artifact
+        uses: actions/download-artifact@v4
         with:
-          key: ${{ runner.os }}-build-${{ github.run_id }}
-          fail-on-cache-miss: true
-          path: |
-            zephyrproject/
-            kenning-zephyr-workspace/
-            zephyr-sdk/
-            micropython/
-            boards_sample_pairs
+          name: 'zephyr_env'
+
+      - name: Unpack the build env
+        run: |
+          tar xf env.tar.gz
+          ls -la
 
       - name: Prepare build environment
         run: |
@@ -200,15 +201,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/cache@v4
+      - name: Download environment artifact
+        uses: actions/download-artifact@v4
         with:
-          key: ${{ runner.os }}-build-${{ github.run_id }}
-          fail-on-cache-miss: true
-          path: |
-            zephyrproject/
-            zephyr-sdk/
-            micropython/
-            boards_sample_pairs
+          name: 'zephyr_env'
+
+      - name: Unpack the build env
+        run: |
+          tar xf env.tar.gz
+          ls -la
 
       - id: gcp-auth
         name: GCP Authentcation
@@ -280,7 +281,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Download build status results
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: status
           path: build/
