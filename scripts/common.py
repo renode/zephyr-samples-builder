@@ -289,17 +289,17 @@ def get_dts_include_chain(arch: str, dts_filename: str, chain=[]) -> list:
     return chain
 
 
-def sanitize_upper(string: str) -> str:
+def sanitize_lower(string: str) -> str:
     """
     Sanitize the string, so that the string only contains alpha-numeric
     characters or underscores. All non-alpha-numeric characters are replaced
     with an underscore, '_'.
-    When string has been sanitized it will be converted into upper case.
+    When string has been sanitized it will be converted into lower case.
 
     Args:
         string(str): The string to sanitize.
 
     Returns:
-        str: Sanitized and upper-cased string.
+        str: Sanitized and lower-cased string.
     """
-    return re.sub(r'[^a-zA-Z0-9_]', '_', string).upper()
+    return re.sub(r'[^a-zA-Z0-9_]', '_', string).lower()

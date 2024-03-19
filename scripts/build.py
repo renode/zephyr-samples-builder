@@ -29,7 +29,7 @@ from common import (
     calculate_md5,
     conv_zephyr_mem_usage,
     get_dts_include_chain,
-    sanitize_upper,
+    sanitize_lower,
     get_sample_workspace,
     get_sample_extra_args,
 )
@@ -545,7 +545,7 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
 
     # Template used for naming arfitacts
     # Use sanitized `board_name` for the folder structure and artifact names
-    board_name_sanitized = sanitize_upper(board_name)
+    board_name_sanitized = sanitize_lower(board_name)
     project_sample_name = f"{board_name_sanitized}/{sample_name}"
 
     # Create artifacts location
