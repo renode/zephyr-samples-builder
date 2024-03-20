@@ -84,6 +84,7 @@ jobs:
 
     strategy:
       matrix: ${{ fromJSON(needs.Prepare-Workload.outputs.matrix) }}
+      fail-fast: false
 
     permissions:
       contents: 'read'
