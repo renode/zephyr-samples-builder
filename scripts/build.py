@@ -32,6 +32,7 @@ from common import (
     sanitize_lower,
     get_sample_workspace,
     get_sample_extra_args,
+    get_dts_by_identifier,
 )
 
 templateLoader = jinja2.FileSystemLoader(searchpath="./")
@@ -577,13 +578,19 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
     elf_md5_name = config.artifact_paths["elf-md5"].format(**format_args)
 
     try:
-        board_yaml_data = get_yaml_data(get_board_yaml_path_by_identifier(board_dir, board_name))
+        board_yaml_path = get_board_yaml_path_by_identifier(board_dir, board_name)
+        board_yaml_data = get_yaml_data(board_yaml_path)
     except YAMLNotFoundException:
         print(bold(f"Skipping target due to missing YAML file: {board_name}"))
         return
 
     platform_full_name = get_full_name(board_yaml_data)
     arch = board_yaml_data["arch"]
+
+    # XXX:
+    # * the `dts_include_chain` is used by the Renodepedia as a data input
+    # * uses _non-flattened_ device tree
+    dts_include_chain = get_dts_include_chain(arch, get_dts_by_identifier(board_dir, board_name, board_yaml_path))
 
     result = {
         "platform": board_name_sanitized,
@@ -598,7 +605,7 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
         "platform_full_name": platform_full_name,
         "board_dir": '/'.join(board_dir.split('/')[2:]),  # Drop 'zephyrproject/zephyr' from the path
         "memory": run.get_memory_usage(),
-        "dts_include_chain": get_dts_include_chain(arch, f'{board_dir}/{board_name}.dts'),  # XXX: uses _non-flattened_ device tree
+        "dts_include_chain": dts_include_chain,
     }
 
     info = "Success!" if run.success else "Fail!"

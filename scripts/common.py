@@ -255,6 +255,107 @@ def conv_zephyr_mem_usage(val: str) -> int:
     return val
 
 
+def identifier_drop_revision(identifier: str) -> str:
+    """
+    Drop the revision from the Zephyr identifier.
+
+    Args:
+        identifier (str): Non-sanitized Zephyr board identifier.
+
+    Returns:
+        str: Non-sanitized Zephyr board identifier without the revision.
+    """
+    match = re.match(r'^([^@/]+)(?:@[^/]+)?(?:/([^@]+))?$', identifier)
+    if match:
+        board_path = match.group(1)
+        soc_path = match.group(2)
+        if soc_path:
+            return f"{board_path}/{soc_path}"
+        else:
+            return board_path
+
+
+def identifier_get_substrings(identifier: str) -> list:
+    """
+    Drop the revision from the Zephyr identifier.
+
+    Example:
+        actinius_icarus/nrf9160 -> ['actinius_icarus_nrf9160', 'actinius_icarus', 'actinius']
+
+    Args:
+        identifier (str): Sanitized Zephyr board identifier.
+
+    Returns:
+        list: A list of substrings separated on `_`
+    """
+    substrings = []
+    parts = identifier.split('_')
+    for i in range(len(parts), 0, -1):
+        substrings.append('_'.join(parts[:i]))
+    return substrings
+
+
+def get_dts_by_identifier(board_dir: str, board_identifier: str, board_yaml_path: str) -> str:
+    '''
+    Try to get the target's base `dts` file.
+
+    XXX: this is a hackfest, but currently Zephyr doesn't provide an easy way of matching
+    the identifier to the corresponding dts file.
+
+    TODO: One of the possible approaches to change this would be to actually use the original @wspiak
+          approach of generating the workload: use Zephyr's `get_board()` and `get_hardware()` scripts
+          to generate all possible `board@rev/soc/cluster` permutations. We could use this data here.
+
+    For more information on how Zephyr determines the correct DTS file and its overlays PTAL:
+        * cmake/modules/dts.cmake         - `DTS_SOURCE` variable
+        * cmake/modules/extensions.cmake  - `zephyr_build_string` function
+    '''
+    # Get all dts files inside the `board_dir`
+    filenames = []
+    for root, dirs, files in os.walk(board_dir):
+        for file in files:
+            if file.endswith('.dts'):
+                filenames.append(file)
+
+    # If there is only one `dts` file -> use it
+    if len(filenames) == 1:
+        return os.path.join(board_dir, filenames[0])
+
+    # Most of the time the time `.dts` basename is the same as the coresponding `.yaml` file basename, for example:
+    # nucleo_h745zi_q_stm32h745xx_m4.yaml -> nucleo_h745zi_q_stm32h745xx_m4.dts
+    dts_candidate_from_yaml_name = f'{board_dir}/{os.path.splitext(os.path.basename(board_yaml_path))[0]}.dts'
+    if os.path.exists(dts_candidate_from_yaml_name):
+        return dts_candidate_from_yaml_name
+
+    # Multiple `dts` files and no direct match has been made. Attempt to match _closest_ `dts` file
+    # 1. Remove `BOARD_REVISION` from the target identifier
+    # 2. Create a list of possible `dts` filenames, with decreasing specificity (the `.dts` suffix is added to the end of each list)
+    # 3. Check if a `dts` file with the decreased specificity exists
+    #  3.1. yes -> use it
+    #  3.2  no -> attempt lower specificity
+    #
+    # Example flow
+    # (0) target_identifier = actinius_icarus@2.0.0/nrf9160
+    # (1) actinius_icarus@2.0.0/nrf9160 -> actinius_icarus/nrf9160
+    # (2) ['actinius_icarus_nrf9160.dts', 'actinius_icarus.dts', 'actinius.dts']
+    # (3) `actinius_icarus_nrf9160.dts` exists and matches the identifier
+    board_identifier_sanitized = sanitize_lower(identifier_drop_revision(board_identifier))
+    possible_dts_filenames = [f'{s}.dts' for s in identifier_get_substrings(board_identifier_sanitized)]
+
+    for dts_candidate in possible_dts_filenames:
+        full_path = os.path.join(board_dir, dts_candidate)
+        if dts_candidate in filenames and os.path.exists(full_path):
+            return full_path
+
+    # All heuristics have failed!
+    # Return any `dts` file as a failsafe, None if no `dts` files have been found.
+    if filenames:
+        return filenames[0]
+    else:
+        print(red(f'NO DTS FILE FOUND FOR {board_identifier}'))
+        return ""
+
+
 def get_dts_include_chain(arch: str, dts_filename: str, chain=[]) -> list:
     """
     Recursively read .dts file to retrieve the CPU dependency chain.
