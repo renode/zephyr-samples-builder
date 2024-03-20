@@ -484,7 +484,6 @@ def get_board_yaml_path_by_identifier(board_dir: str, board_name: str) -> str:
     If any yaml file identifier matches the board_name -> return yaml file location,
     In case no matches are made, raise YAMLNotFoundException.
     """
-    print(f'board_dir: {board_dir}, board_name: {board_name}')
     for root, dirs, files in os.walk(board_dir):
         for file in files:
             if file.endswith('.yaml'):
