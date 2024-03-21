@@ -201,6 +201,16 @@ jobs:
       id-token: write
 
     steps:
+      - name: Increase build space
+        run: |
+          echo "Before cleanup"
+          df -H
+          sudo rm -rf /usr/share/dotnet/*
+          sudo rm -rf /usr/local/lib/android/*
+          sudo rm -rf /opt/ghc/*
+          echo "After cleanup"
+          df -H
+
       - uses: actions/checkout@v3
       - name: Download environment artifact
         uses: actions/download-artifact@v4
