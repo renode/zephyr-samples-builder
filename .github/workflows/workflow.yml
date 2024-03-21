@@ -282,7 +282,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Download build status results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: status
           path: build/
