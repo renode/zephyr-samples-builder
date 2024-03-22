@@ -104,7 +104,6 @@ def collective_json_result(aggregated_results: list) -> str:
         if platform not in collective:
             collective[platform] = dict(
                     arch=result["arch"],
-                    arch_bits = result["arch_bits"],
                     name=result["platform_full_name"],
                     samples=dict())
 
