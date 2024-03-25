@@ -455,15 +455,18 @@ class SampleBuilder:
         return fail
 
     def _check_if_64bit(self):
-        zephyr_config_file = self.get_artifacts()["config"]
+        try:
+            zephyr_config_file = self.get_artifacts()["config"]
 
-        with open(zephyr_config_file) as f:
-            zephyr_config = f.read().splitlines()
+            with open(zephyr_config_file) as f:
+                zephyr_config = f.read().splitlines()
 
-        symbol = 'CONFIG_64BIT=y'
-        for line in zephyr_config:
-            if line == symbol:
+            if 'CONFIG_64BIT=y' in zephyr_config:
                 return True
+
+        except KeyError:
+            # "config" doesn't exist in artifacts
+            pass
 
         return False
 
