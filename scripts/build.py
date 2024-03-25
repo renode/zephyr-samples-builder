@@ -75,6 +75,7 @@ class SampleBuilder:
         self.dts_original = tempfile.mkstemp(suffix='_dts_original', text=True)[1]
 
         self.success = False
+        self.arch_bits = 32
 
     # Constants
     ARTIFACTS = {
@@ -128,6 +129,10 @@ class SampleBuilder:
         arifacts = self.get_artifacts()
 
         self.success = (not fail) and ("elf" in arifacts) and self._check_kconfig_requirements()
+
+        self.arch_bits = 32
+        if self._check_if_64bit():
+            self.arch_bits = 64
 
         return arifacts
 
@@ -449,6 +454,19 @@ class SampleBuilder:
 
         return fail
 
+    def _check_if_64bit(self):
+        zephyr_config_file = self.get_artifacts()["config"]
+
+        with open(zephyr_config_file) as f:
+            zephyr_config = f.read().splitlines()
+
+        symbol = 'CONFIG_64BIT=y'
+        for line in zephyr_config:
+            if line == symbol:
+                return True
+
+        return False
+
     def _check_kconfig_requirements(self):
         """
         Check if the config file generated for this board has symbols set to the
@@ -613,6 +631,7 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
         "board_dir": '/'.join(board_dir.split('/')[2:]),  # Drop 'zephyrproject/zephyr' from the path
         "memory": run.get_memory_usage(),
         "dts_include_chain": dts_include_chain,
+        "arch_bits" : run.arch_bits,
     }
 
     info = "Success!" if run.success else "Fail!"
