@@ -256,6 +256,7 @@ jobs:
           if [ -z "$CURRENT_LATEST" ] || ! git merge-base --is-ancestor "$ZEPHYR_VERSION" "$CURRENT_LATEST"; then
               echo $ZEPHYR_VERSION > latest
               gsutil cp latest $LATEST_REMOTE_FILE
+              gsutil setmeta -h "Cache-Control:no-store" $LATEST_REMOTE_FILE
           fi
 
       - name: Update the `versions` file in the bucket.
@@ -276,6 +277,7 @@ jobs:
               echo "New version candidate for the versions file:"
               echo "$ZEPHYR_VERSION" | tee -a versions
               gsutil cp versions $VERSIONS_REMOTE_FILE
+              gsutil setmeta -h "Cache-Control:no-store" $VERSIONS_REMOTE_FILE
           else
               echo "The version is already present in the versions file:"
               echo "$ZEPHYR_VERSION"
