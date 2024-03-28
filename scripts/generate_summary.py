@@ -92,6 +92,34 @@ def process_sample_data(aggregated_jsons: list) -> dict:
     return sample_dict
 
 
+def soc_info(dts_chain):
+    if not dts_chain and not len(dts_chain):
+        return ''
+
+    dts_chain_filtered = [el.lstrip('!') for el in dts_chain if "!skeleton" not in el]  # remove all '!skeleton' entries, strip every '!' from other
+    dts_chain_filtered = list(dict.fromkeys(dts_chain_filtered))  # delete duplicates
+
+    r = {
+        'arm/armv': 'Arm v',
+        'arm64/armv': 'Arm v',
+        'xtensa/xtensa': 'Xtensa'
+    }
+
+    if not dts_chain_filtered:
+        return ''
+
+    for k, v in r.items():
+        if k in dts_chain_filtered[-1]:
+            dts_chain_filtered[-1] = dts_chain_filtered[-1].replace(k, v)
+
+    if len(dts_chain_filtered) == 1:
+        dts_cpu_info = dts_chain_filtered[0]
+    else:
+        dts_cpu_info = f'{dts_chain_filtered[-1]} {dts_chain_filtered[0]}'
+
+    return dts_cpu_info
+
+
 def collective_json_result(aggregated_results: list) -> str:
     """
     Process aggregated build result into a single JSON organized by board names.
@@ -113,6 +141,9 @@ def collective_json_result(aggregated_results: list) -> str:
     for result in aggregated_results:
         sample_name = result["sample_name"]
         platform = result["platform"]
+        soc = ''
+        if dts_chain := result.get('dts_include_chain'):
+            soc = soc_info(dts_chain)
 
         # If the pretty name is not unique, append its revision.
         if result["platform_full_name"] in duplicates:
@@ -123,6 +154,7 @@ def collective_json_result(aggregated_results: list) -> str:
                     arch=result["arch"],
                     arch_bits = result["arch_bits"],
                     name=result["platform_full_name"],
+                    soc=soc,
                     samples=dict())
 
         sample_entry = dict(
