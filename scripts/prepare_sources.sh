@@ -58,7 +58,7 @@ cd ..
 
 # Prepare Kenning Zephyr Runtime Demo application
 # This demo uses a custom workspace (west.yaml configuration)
-mkdir -p kenning-zephyr-workspace/kenning-zephyr-runtime 
+mkdir -p kenning-zephyr-workspace/kenning-zephyr-runtime
 cd kenning-zephyr-workspace/kenning-zephyr-runtime
 git init > /dev/null 2> /dev/null
 git remote add origin https://github.com/antmicro/kenning-zephyr-runtime
