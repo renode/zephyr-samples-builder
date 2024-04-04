@@ -18,7 +18,7 @@ on:
   push:
 
 env:
-  MATRIX_RUNNERS: 30
+  MATRIX_RUNNERS: 60
 
 jobs:
 
