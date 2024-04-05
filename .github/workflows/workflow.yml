@@ -91,15 +91,16 @@ jobs:
       id-token: write
 
     steps:
-      - name: Increase build space
-        run: |
-          echo "Before cleanup"
-          df -H
-          sudo rm -rf /usr/share/dotnet/*
-          sudo rm -rf /usr/local/lib/android/*
-          sudo rm -rf /opt/ghc/*
-          echo "After cleanup"
-          df -H
+
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 4096
+          swap-size-mb: 1024
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
 
       - uses: actions/checkout@v3
       - name: Download environment artifact
