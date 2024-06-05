@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import csv
 import os
 import json
 import config
@@ -120,9 +121,9 @@ def soc_info(dts_chain):
     return dts_cpu_info
 
 
-def collective_json_result(aggregated_results: list) -> str:
+def collective_result(aggregated_results: list):
     """
-    Process aggregated build result into a single JSON organized by board names.
+    Process aggregated build result into a single dict organized by board names.
     """
     collective = dict()
 
@@ -164,7 +165,37 @@ def collective_json_result(aggregated_results: list) -> str:
 
         collective[platform]["samples"][sample_name] = sample_entry
 
-    return json.dumps(collective)
+    return collective
+
+
+def collective_json_result(aggregated_results: list) -> str:
+    """
+    Process aggregated build result into a single JSON organized by board names.
+    """
+    return json.dumps(collective_result(aggregated_results))
+
+
+def minimal_csv_result(aggregated_results: list):
+    return [[
+        elem['platform'],
+        elem['sample_name'],
+        1 if elem['success'] else 0,
+        1 if elem['extended_memory'] else 0
+    ] for elem in aggregated_results]
+
+
+def board_info_csv(collective_result):
+    # use a dictionary in order not to duplicate entries about the same platform
+    boards = {}
+    for platform, data in collective_result.items():
+        boards[platform] = [
+            data['name'],
+            data['soc'],
+            data['arch'],
+            data['arch_bits'],
+        ]
+    return [[key, *val] for key, val in boards.items()]
+
 
 def main():
     versions = get_versions()
@@ -172,6 +203,14 @@ def main():
 
     # Data for markdown table
     stats = generate_stats(summary_data)
+
+    with open('build/result.csv', 'w') as res_csv:
+        writer = csv.writer(res_csv)
+        writer.writerows(minimal_csv_result(summary_data))
+
+    with open('build/boards.csv', 'w') as boards_csv:
+        writer = csv.writer(boards_csv)
+        writer.writerows(board_info_csv(collective_result(summary_data)))
 
     sample_data = process_sample_data(summary_data)
 
