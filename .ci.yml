@@ -1,4 +1,4 @@
 include:
-  - project: "repositories/zephyr-samples-builder-internal-ci"
+  - project: repositories/zephyr-samples-builder-internal-ci
     ref: main
     file: ci-external.yml
