@@ -1,0 +1,205 @@
+From 16a47e4f3b5d1de71be04076ffdf146f341dd2a2 Mon Sep 17 00:00:00 2001
+From: Wojciech Sipak <wsipak@antmicro.com>
+Date: Thu, 20 Jun 2024 15:43:06 +0200
+Subject: [PATCH] use proper headers from Zephyr
+
+zephyr/zephyr.h is deprecated since 7f2ad2e27d6e887291abcc34fadca8699d495523
+---
+ ports/zephyr/machine_i2c.c          | 2 +-
+ ports/zephyr/machine_pin.c          | 2 +-
+ ports/zephyr/machine_spi.c          | 2 +-
+ ports/zephyr/machine_uart.c         | 2 +-
+ ports/zephyr/main.c                 | 2 +-
+ ports/zephyr/modusocket.c           | 2 +-
+ ports/zephyr/modutime.c             | 2 +-
+ ports/zephyr/modzephyr.c            | 2 +-
+ ports/zephyr/modzsensor.c           | 2 +-
+ ports/zephyr/mpconfigport.h         | 2 +-
+ ports/zephyr/mpconfigport_minimal.h | 2 +-
+ ports/zephyr/mphalport.h            | 2 +-
+ ports/zephyr/src/zephyr_getchar.c   | 2 +-
+ ports/zephyr/src/zephyr_start.c     | 2 +-
+ 14 files changed, 14 insertions(+), 14 deletions(-)
+
+diff --git a/ports/zephyr/machine_i2c.c b/ports/zephyr/machine_i2c.c
+index c261ffa..a1ad46c 100644
+--- a/ports/zephyr/machine_i2c.c
++++ b/ports/zephyr/machine_i2c.c
+@@ -29,7 +29,7 @@
+ #include <stdint.h>
+ #include <string.h>
+ 
+-#include <zephyr/zephyr.h>
++#include <zephyr/kernel.h>
+ #include <zephyr/drivers/i2c.h>
+ 
+ #include "py/runtime.h"
+diff --git a/ports/zephyr/machine_pin.c b/ports/zephyr/machine_pin.c
+index be06986..fad8bc9 100644
+--- a/ports/zephyr/machine_pin.c
++++ b/ports/zephyr/machine_pin.c
+@@ -29,7 +29,7 @@
+ #include <stdint.h>
+ #include <string.h>
+ 
+-#include <zephyr/zephyr.h>
++#include <zephyr/kernel.h>
+ #include <zephyr/drivers/gpio.h>
+ 
+ #include "py/runtime.h"
+diff --git a/ports/zephyr/machine_spi.c b/ports/zephyr/machine_spi.c
+index 507d839..c850181 100644
+--- a/ports/zephyr/machine_spi.c
++++ b/ports/zephyr/machine_spi.c
+@@ -28,7 +28,7 @@
+ #include <stdint.h>
+ #include <string.h>
+ 
+-#include <zephyr/zephyr.h>
++#include <zephyr/kernel.h>
+ #include <zephyr/drivers/spi.h>
+ 
+ #include "py/runtime.h"
+diff --git a/ports/zephyr/machine_uart.c b/ports/zephyr/machine_uart.c
+index b989c0f..e5af03c 100644
+--- a/ports/zephyr/machine_uart.c
++++ b/ports/zephyr/machine_uart.c
+@@ -29,7 +29,7 @@
+ #include <stdint.h>
+ #include <string.h>
+ 
+-#include <zephyr/zephyr.h>
++#include <zephyr/kernel.h>
+ #include <zephyr/drivers/uart.h>
+ 
+ #include "py/runtime.h"
+diff --git a/ports/zephyr/main.c b/ports/zephyr/main.c
+index 869449e..857cce2 100644
+--- a/ports/zephyr/main.c
++++ b/ports/zephyr/main.c
+@@ -29,7 +29,7 @@
+ #include <stdio.h>
+ #include <string.h>
+ 
+-#include <zephyr/zephyr.h>
++#include <zephyr/kernel.h>
+ #ifdef CONFIG_NETWORKING
+ #include <zephyr/net/net_context.h>
+ #endif
+diff --git a/ports/zephyr/modusocket.c b/ports/zephyr/modusocket.c
+index c79f73a..d06063d 100644
+--- a/ports/zephyr/modusocket.c
++++ b/ports/zephyr/modusocket.c
+@@ -31,7 +31,7 @@
+ #include "py/stream.h"
+ 
+ #include <stdio.h>
+-#include <zephyr/zephyr.h>
++#include <zephyr/kernel.h>
+ // Zephyr's generated version header
+ #include <version.h>
+ #include <zephyr/net/net_context.h>
+diff --git a/ports/zephyr/modutime.c b/ports/zephyr/modutime.c
+index c1c2be1..c56a800 100644
+--- a/ports/zephyr/modutime.c
++++ b/ports/zephyr/modutime.c
+@@ -28,7 +28,7 @@
+ #include "py/mpconfig.h"
+ #if MICROPY_PY_UTIME
+ 
+-#include <zephyr/zephyr.h>
++#include <zephyr/kernel.h>
+ 
+ #include "py/runtime.h"
+ #include "py/smallint.h"
+diff --git a/ports/zephyr/modzephyr.c b/ports/zephyr/modzephyr.c
+index f87e2e3..c25351b 100644
+--- a/ports/zephyr/modzephyr.c
++++ b/ports/zephyr/modzephyr.c
+@@ -29,7 +29,7 @@
+ #if MICROPY_PY_ZEPHYR
+ 
+ #include <stdio.h>
+-#include <zephyr/zephyr.h>
++#include <zephyr/kernel.h>
+ #include <zephyr/debug/thread_analyzer.h>
+ #include <zephyr/shell/shell.h>
+ #include <zephyr/shell/shell_uart.h>
+diff --git a/ports/zephyr/modzsensor.c b/ports/zephyr/modzsensor.c
+index e35a171..f5b0742 100644
+--- a/ports/zephyr/modzsensor.c
++++ b/ports/zephyr/modzsensor.c
+@@ -28,7 +28,7 @@
+ 
+ #include "py/runtime.h"
+ 
+-#include <zephyr/zephyr.h>
++#include <zephyr/kernel.h>
+ #include <zephyr/drivers/sensor.h>
+ 
+ #if MICROPY_PY_ZSENSOR
+diff --git a/ports/zephyr/mpconfigport.h b/ports/zephyr/mpconfigport.h
+index 7183676..12302a1 100644
+--- a/ports/zephyr/mpconfigport.h
++++ b/ports/zephyr/mpconfigport.h
+@@ -28,7 +28,7 @@
+ // Include Zephyr's autoconf.h, which should be made first by Zephyr makefiles
+ #include "autoconf.h"
+ // Included here to get basic Zephyr environment (macros, etc.)
+-#include <zephyr/zephyr.h>
++#include <zephyr/kernel.h>
+ #include <zephyr/drivers/spi.h>
+ 
+ // Usually passed from Makefile
+diff --git a/ports/zephyr/mpconfigport_minimal.h b/ports/zephyr/mpconfigport_minimal.h
+index e819d5c..bb28441 100644
+--- a/ports/zephyr/mpconfigport_minimal.h
++++ b/ports/zephyr/mpconfigport_minimal.h
+@@ -28,7 +28,7 @@
+ // Include Zephyr's autoconf.h, which should be made first by Zephyr makefiles
+ #include "autoconf.h"
+ // Included here to get basic Zephyr environment (macros, etc.)
+-#include <zephyr.h>
++#include <zephyr/kernel.h>
+ 
+ // Usually passed from Makefile
+ #ifndef MICROPY_HEAP_SIZE
+diff --git a/ports/zephyr/mphalport.h b/ports/zephyr/mphalport.h
+index 6158593..8206de5 100644
+--- a/ports/zephyr/mphalport.h
++++ b/ports/zephyr/mphalport.h
+@@ -1,4 +1,4 @@
+-#include <zephyr/zephyr.h>
++#include <zephyr/kernel.h>
+ #include "shared/runtime/interrupt_char.h"
+ 
+ void mp_hal_init(void);
+diff --git a/ports/zephyr/src/zephyr_getchar.c b/ports/zephyr/src/zephyr_getchar.c
+index 5bbf1a9..cade05d 100644
+--- a/ports/zephyr/src/zephyr_getchar.c
++++ b/ports/zephyr/src/zephyr_getchar.c
+@@ -14,7 +14,7 @@
+  * limitations under the License.
+  */
+ 
+-#include <zephyr/zephyr.h>
++#include <zephyr/kernel.h>
+ #include <zephyr/drivers/uart.h>
+ #include <zephyr/drivers/console/uart_console.h>
+ #include <zephyr/sys/printk.h>
+diff --git a/ports/zephyr/src/zephyr_start.c b/ports/zephyr/src/zephyr_start.c
+index b24e501..bdc4fd4 100644
+--- a/ports/zephyr/src/zephyr_start.c
++++ b/ports/zephyr/src/zephyr_start.c
+@@ -23,7 +23,7 @@
+  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  * THE SOFTWARE.
+  */
+-#include <zephyr/zephyr.h>
++#include <zephyr/kernel.h>
+ #include <zephyr/console/console.h>
+ #include "zephyr_getchar.h"
+ 
+-- 
+2.44.0
+
