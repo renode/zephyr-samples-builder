@@ -172,10 +172,6 @@ def main():
 
     # Data for markdown table
     stats = generate_stats(summary_data)
-    json_res = collective_json_result(summary_data)
-
-    with open('build/result.json', 'w') as res:
-        res.write(json_res)
 
     sample_data = process_sample_data(summary_data)
 
