@@ -34,14 +34,16 @@ cd ../../..
 # Download Zephyr SDK
 mkdir -p zephyr-sdk
 curl -kLs https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64.tar.xz | tar xJ --strip 1 -C zephyr-sdk &
+ZEPHYR_SDK_BG=$!
 
 # Install Zephyr requirements (west)
 cd zephyrproject/zephyr
 pip3 -q install -r scripts/requirements.txt
 cd -
 
-# Wait for download and unpacking of SDK to finish
-wait
+# Wait for download and unpacking of SDK to finish.
+# This should fail if the download failed.
+wait "$ZEPHYR_SDK_BG"
 
 # Zephyrproject setup
 west init -l zephyrproject/zephyr
