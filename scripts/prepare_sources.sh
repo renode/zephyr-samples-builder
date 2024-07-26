@@ -32,8 +32,7 @@ rm -rf .git
 cd ../../..
 
 # Download Zephyr SDK
-mkdir -p zephyr-sdk
-curl -kLs https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64.tar.xz | tar xJ --strip 1 -C zephyr-sdk &
+./scripts/fetch_sdk.sh &
 ZEPHYR_SDK_BG=$!
 
 # Install Zephyr requirements (west)
