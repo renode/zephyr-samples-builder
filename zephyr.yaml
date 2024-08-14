@@ -33,7 +33,7 @@ samples:
   synchronization:
     path: "samples/synchronization"
   lz4:
-    path: "samples/compression/lz4"
+    path: "samples/modules/compression/lz4"
   rust-app:
     path: "samples/../zephyr-rust/samples/rust-app"
     kconfig:
