@@ -1,0 +1,31 @@
+From 82567a1d9780b9e518e5eb3cc3cedc7974584938 Mon Sep 17 00:00:00 2001
+From: Wojciech Sipak <wsipak@antmicro.com>
+Date: Mon, 23 Sep 2024 14:39:51 +0200
+Subject: [PATCH] use CONFIG_MP_MAX_NUM_CPUS instead of deprecated symbol
+
+In Zephyr, CONFIG_MP_NUM_CPUS has been replaced
+with CONFIG_MP_MAX_NUM_CPUS
+
+See https://github.com/zephyrproject-rtos/zephyr/pull/78581
+
+Signed-off-by: Wojciech Sipak <wsipak@antmicro.com>
+---
+ library/std/src/sys/zephyr/thread.rs | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/library/std/src/sys/zephyr/thread.rs b/library/std/src/sys/zephyr/thread.rs
+index ced4ffb6fbc..bde99c3f4dc 100644
+--- a/library/std/src/sys/zephyr/thread.rs
++++ b/library/std/src/sys/zephyr/thread.rs
+@@ -33,7 +33,7 @@ pub fn join(self) {
+ }
+ 
+ pub fn available_parallelism() -> io::Result<NonZeroUsize> {
+-    Ok(unsafe { NonZeroUsize::new_unchecked(zephyr_sys::raw::CONFIG_MP_NUM_CPUS as usize) })
++    Ok(unsafe { NonZeroUsize::new_unchecked(zephyr_sys::raw::CONFIG_MP_MAX_NUM_CPUS as usize) })
+ }
+ 
+ pub mod guard {
+-- 
+2.45.0
+

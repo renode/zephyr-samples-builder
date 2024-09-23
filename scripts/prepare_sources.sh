@@ -28,6 +28,9 @@ git remote add origin https://github.com/tylerwhall/zephyr-rust
 git pull --depth 1 origin ${ZEPHYR_RUST_VERSION} > /dev/null 2> /dev/null
 git submodule update --init --recursive  > /dev/null 2> /dev/null
 git am ../../../patches/zephyr-rust/*.patch
+pushd rust/rust
+git am ../../../../../patches/rust/*.patch
+popd
 rm -rf .git
 cd ../../..
 
