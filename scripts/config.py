@@ -5,6 +5,9 @@ import sys
 from argparse import ArgumentParser
 
 # these project-specific values are loaded from the --config YAML
+_project = ""
+_project_name = ""
+_project_git_tree = ""
 _project_path = ""
 _samples = {}
 _custom_samples = {}
