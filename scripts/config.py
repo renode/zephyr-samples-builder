@@ -1,4 +1,7 @@
+#!/usr/bin/env python3
 import yaml
+import json
+import sys
 from argparse import ArgumentParser
 
 # these project-specific values are loaded from the --config YAML
@@ -48,3 +51,8 @@ def __getattr__(name):
     if attr is None:
         raise AttributeError(name)
     return attr
+
+
+if __name__ == "__main__":
+    load()
+    json.dump(_dict, sys.stdout)
