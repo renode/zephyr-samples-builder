@@ -8,11 +8,13 @@ _custom_samples = {}
 _artifact_names = {}
 _artifact_paths = {}
 _artifact_prefix = ""
+_dict = {}
 
 _loaded = False
 
 
 def load(config_path=None):
+    global _dict
     if config_path is None:
         ap = ArgumentParser()
         ap.add_argument("-c", "--config", required=True)
@@ -21,6 +23,7 @@ def load(config_path=None):
 
     with open(config_path) as f:
         config = yaml.safe_load(f)
+    _dict = config
 
     for key in config:
         hidden_key = "_" + key
@@ -29,6 +32,9 @@ def load(config_path=None):
 
     for artifact_name, artifact_path in _artifact_names.items():
         _artifact_paths[artifact_name] = _artifact_prefix + artifact_path
+
+    # Also expose this computed key in the dict for completeness
+    _dict["artifact_paths"] = _artifact_paths
 
     global _loaded
     _loaded = True
