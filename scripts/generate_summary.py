@@ -130,8 +130,9 @@ def collective_result(aggregated_results: list):
     # Find duplicated board names.
     names = set()
     duplicates = set()
+    first_sample_name = next(iter(config.samples))
     for result in aggregated_results:
-        if result["sample_name"] != "hello_world":
+        if result["sample_name"] != first_sample_name:
             continue
         name = result["platform_full_name"]
         if name in names:
