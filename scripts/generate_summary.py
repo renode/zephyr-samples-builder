@@ -31,8 +31,14 @@ def aggregate_json_files(directory: str) -> list:
                 file_path = os.path.join(root, file)
                 with open(file_path, "r") as f:
                     data = json.load(f)
-                    aggregated_data.append(data)
-    return aggregated_data
+                    # This is to handle the initial aggregation, where each json file contains a dict
+                    # describing a single board, and the final aggregation, which combines the result
+                    # files from each job in the build stage
+                    if isinstance(data, list):
+                        aggregated_data.extend(data)
+                    else:
+                        aggregated_data.append(data)
+    return sorted(aggregated_data, key=lambda x: x["platform"])
 
 
 def generate_stats(data: list) -> dict:
