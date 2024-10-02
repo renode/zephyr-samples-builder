@@ -154,7 +154,7 @@ def collective_result(aggregated_results: list):
         if platform not in collective:
             collective[platform] = dict(
                     arch=result["arch"],
-                    arch_bits = result["arch_bits"],
+                    arch_bits=result["arch_bits"],
                     name=result["platform_full_name"],
                     soc=soc,
                     samples=dict())
