@@ -5,6 +5,7 @@ import os
 import json
 import config
 import jinja2
+from argparse import ArgumentParser
 from common import get_versions
 
 # Setup Jinja2 environment
@@ -198,9 +199,14 @@ def board_info_csv(collective_result):
     return [[key, *val] for key, val in boards.items()]
 
 
-def main():
+def main(args):
     versions = get_versions()
     summary_data = aggregate_json_files("build/")
+
+    if args.json_only:
+        with open('build/result.json', 'w') as res_json:
+            json.dump(summary_data, res_json)
+        return
 
     # Data for markdown table
     stats = generate_stats(summary_data)
@@ -222,4 +228,12 @@ def main():
 
 if __name__ == "__main__":
     config.load()
-    main()
+    ap = ArgumentParser()
+    ap.add_argument(
+        "--json-only",
+        default=False,
+        action="store_true",
+        help="Produce an aggregated results.json file and do no further processing",
+    )
+    args, _ = ap.parse_known_args()
+    main(args)
