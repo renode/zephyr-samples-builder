@@ -12,6 +12,51 @@ This repository contains tools used in CI pipelines that automatically builds Ze
 
 Edit the `zephyr.yaml` file to define the Zephyr samples you want to build.
 
+
+## Building the samples locally
+
+Create and activate a Python virtual environment:
+```sh
+python -m venv .venv
+. .venv/bin/activate
+```
+
+Install builder dependencies:
+```sh
+pip install -r requirements.txt
+```
+
+Source the versions file:
+
+```sh
+. .env
+```
+
+Prepare the build environment:
+
+```sh
+./scripts/prepare_sources.sh
+```
+
+Generate a list of targets to build:
+
+```sh
+./scripts/get_boards_samples_pairs.py -c zephyr.yaml > boards_sample_pairs
+```
+
+Run the sequential build using GNU Parallel:
+
+```sh
+parallel -j +0 --keep-order --col-sep " " --halt now,fail=1 ./scripts/build.py --config=zephyr.yaml {} -j {#} -J `wc -l < boards_sample_pairs` '::::' boards_sample_pairs
+```
+
+Or build a single target:
+
+```sh
+./scripts/build.py 'zephyrproject/zephyr/boards/96boards/aerocore2' '96b_aerocore2' 'hello_world' -c zephyr.yaml
+```
+
+
 ## Artifacts
 
 Artifacts generated during the build process:
