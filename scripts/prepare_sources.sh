@@ -71,7 +71,7 @@ git pull --depth 1 origin ${KENNING_ZEPHYR_RUNTIME_VERSION} > /dev/null 2> /dev/
 
 # Initialize another zephyr workspace
 west init -l .
-west update
+west update -o=--no-tags
 west zephyr-export
 
 # Prepare required modules
