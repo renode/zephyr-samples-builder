@@ -283,6 +283,17 @@ def identifier_get_revision(identifier: str) -> str:
         return match.group(1)[1:]
     return ''
 
+def identifier_split(identifier: str) -> (str, str, str, str):
+    """
+    Splits target name into a tuple: (platform_name, revision, soc_name, variant) where particular elements can bee emptry string if not specified directly in the target name.
+    """
+    match = re.match(r'^([^@/]+)(@[^/]+)?(/[^/]+)?(/.+)?$', identifier)
+    platform_name = match.group(1) if match and match.group(1) else ''
+    revision = match.group(2)[1:] if match and match.group(2) else ''
+    soc_name = match.group(3)[1:] if match and match.group(3) else ''
+    variant = match.group(4)[1:] if match and match.group(4) else ''
+    return (platform_name, revision, soc_name, variant)
+
 def identifier_get_substrings(identifier: str) -> list:
     """
     Drop the revision from the Zephyr identifier.
