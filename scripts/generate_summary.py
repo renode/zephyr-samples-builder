@@ -176,11 +176,6 @@ def collective_result(aggregated_results: list):
     return collective
 
 
-def collective_json_result(aggregated_results: list) -> str:
-    """
-    Process aggregated build result into a single JSON organized by board names.
-    """
-    return json.dumps(collective_result(aggregated_results))
 
 
 def minimal_csv_result(aggregated_results: list):
