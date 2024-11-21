@@ -501,8 +501,7 @@ class SampleBuilder:
 
         return ret
 
-def get_full_name(yaml_data):
-    full_board_name = yaml_data['name']
+def get_full_name(full_board_name):
     if len(full_board_name) > 50:
         full_board_name = re.sub(r'\(.*\)', '', full_board_name)
     return full_board_name
@@ -607,13 +606,23 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
     elf_md5_name = config.artifact_paths["elf-md5"].format(**format_args)
 
     try:
+        board_common_yaml_data = get_yaml_data(f"{board_dir}/board.yml")
         board_yaml_path = get_board_yaml_path_by_identifier(board_dir, board_name)
         board_yaml_data = get_yaml_data(board_yaml_path)
     except YAMLNotFoundException:
         print(bold(f"Skipping target due to missing YAML file: {board_name}"))
         return
 
-    platform_full_name = get_full_name(board_yaml_data)
+    platform_full_name = get_full_name(board_yaml_data['name'])
+
+    # board.yml might have different forms, with a single board or multiple boards;
+    # here we'll only support the single-board format
+    # also note that the `full_name` property is not alwyas present, so we need to be prepared for that
+    if 'board' in board_common_yaml_data and 'full_name' in board_common_yaml_data['board']:
+        platform_name = get_full_name(board_common_yaml_data['board']['full_name'])
+    else:
+        platform_name = platform_full_name
+
     arch = board_yaml_data["arch"]
 
     (identifier_platform, identifier_revision, identifier_soc, identifier_variant) = identifier_split(board_name)
@@ -642,7 +651,8 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
         "zephyr_sha": get_versions()["zephyr"],
         "zephyr_sdk": get_versions()["sdk"],
         "arch": arch,
-        "platform_full_name": platform_full_name,
+        "platform_full_name": platform_full_name, # a full name of the platform, possibly with the software variant and board revision part
+        "board_name": platform_name, # a name that should not include software variant or board revision version
         "board_dir": '/'.join(board_dir.split('/')[2:]),  # Drop 'zephyrproject/zephyr' from the path
         "memory": run.get_memory_usage(),
         "dts_include_chain": dts_include_chain,
