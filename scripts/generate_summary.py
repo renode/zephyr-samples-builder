@@ -2,6 +2,7 @@
 
 import csv
 import os
+import re
 import json
 import config
 import jinja2
@@ -14,7 +15,7 @@ template_env = jinja2.Environment(loader=template_loader)
 summary_template = template_env.get_template("templates/summary.md")
 
 
-def aggregate_json_files(directory: str) -> list:
+def aggregate_json_files(directory: str, pattern: str) -> list:
     """
     Aggregate data from JSON files in the given directory
 
@@ -24,10 +25,11 @@ def aggregate_json_files(directory: str) -> list:
     Returns:
         list: List of aggregated JSON data
     """
+    file_name_pattern = re.compile(pattern)
     aggregated_data = []
     for root, _, files in os.walk(directory):
         for file in files:
-            if file.endswith("-result.json"):
+            if file_name_pattern.match(file):
                 file_path = os.path.join(root, file)
                 with open(file_path, "r") as f:
                     data = json.load(f)
@@ -201,40 +203,82 @@ def board_info_csv(collective_result):
 
 
 def main(args):
-    versions = get_versions()
-    summary_data = aggregate_json_files("build/")
+    if args.join_partial_build_results:
+        summary_data = aggregate_json_files(args.data_dir, args.file_pattern)
+        print(json.dumps(summary_data))
 
-    if args.json_only:
-        with open('build/result.json', 'w') as res_json:
-            json.dump(summary_data, res_json)
-        return
+    if args.generate_final_build_results:
+        summary_data = aggregate_json_files(args.data_dir, args.file_pattern)
+        summary_data = collective_result(summary_data)
+        print(json.dumps(summary_data))
 
-    # Data for markdown table
-    stats = generate_stats(summary_data)
+    if args.print_table or args.print_stats or args.generate_csv:
+        summary_data = aggregate_json_files(args.data_dir, args.file_pattern)
+        # Data for markdown table
+        stats = generate_stats(summary_data)
 
-    with open('build/result.csv', 'w') as res_csv:
-        writer = csv.writer(res_csv)
-        writer.writerows(minimal_csv_result(summary_data))
+        if args.print_stats:
+            print(stats)
 
-    with open('build/boards.csv', 'w') as boards_csv:
-        writer = csv.writer(boards_csv)
-        writer.writerows(board_info_csv(collective_result(summary_data)))
+        if args.generate_csv:
+            with open('build/result.csv', 'w') as res_csv:
+                writer = csv.writer(res_csv)
+                writer.writerows(minimal_csv_result(summary_data))
 
-    sample_data = process_sample_data(summary_data)
+            with open('build/boards.csv', 'w') as boards_csv:
+                writer = csv.writer(boards_csv)
+                writer.writerows(board_info_csv(collective_result(summary_data)))
 
-    # Render the table
-    rendered = summary_template.render(versions=versions, stats=stats, sample_data=sample_data)
-    print(rendered)
+        if args.print_table:
+            # Render the table
+            versions = get_versions()
+            sample_data = process_sample_data(summary_data)
+            rendered = summary_template.render(versions=versions, stats=stats, sample_data=sample_data)
+            print(rendered)
 
 
 if __name__ == "__main__":
     config.load()
     ap = ArgumentParser()
     ap.add_argument(
-        "--json-only",
-        default=False,
+        "--data-dir",
+        action="store",
+        default="build",
+        help="Search for data files in the provided location"
+    )
+    ap.add_argument(
+        "--file-pattern",
+        action="store",
+        default=".+\.json",
+        help="Operate on files matching the provided pattern"
+    )
+    ap.add_argument(
+        "--join-partial-build-results",
         action="store_true",
-        help="Produce an aggregated results.json file and do no further processing",
+        default=False,
+        help="Join and print partial build results",
+    )
+    ap.add_argument(
+        "--generate-final-build-results",
+        action="store_true",
+        default=False,
+        help="Generate a final JSON document with build results",
+    )
+    ap.add_argument(
+        "--print-table",
+        action="store",
+        help="Print a table with the build summary",
+    )
+    ap.add_argument(
+        "--print-stats",
+        action="store",
+        help="Print a summary data",
+    )
+    ap.add_argument(
+        "--generate-csv",
+        action="store_true",
+        default=False,
+        help="Save boards and results CSV files",
     )
     args, _ = ap.parse_known_args()
     main(args)
