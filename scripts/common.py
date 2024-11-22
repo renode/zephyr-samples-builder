@@ -274,15 +274,6 @@ def identifier_drop_revision(identifier: str) -> str:
         else:
             return board_path
 
-def identifier_get_revision(identifier: str) -> str:
-    """
-    Retrieve the revision from target name or empty string if no revision is specified.
-    """
-    match = re.match(r'^(?:[^@/]+)(@[^/]+)?(?:/([^@]+))?$', identifier)
-    if match and match.group(1):
-        return match.group(1)[1:]
-    return ''
-
 def identifier_split(identifier: str) -> (str, str, str, str):
     """
     Splits target name into a tuple: (platform_name, revision, soc_name, variant) where particular elements can bee emptry string if not specified directly in the target name.
