@@ -30,7 +30,7 @@ from common import (
     conv_zephyr_mem_usage,
     get_dts_include_chain,
     sanitize_lower,
-    identifier_get_revision,
+    identifier_split,
     get_sample_workspace,
     get_sample_extra_args,
     get_dts_by_identifier,
@@ -575,7 +575,6 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
     # Template used for naming arfitacts
     # Use sanitized `board_name` for the folder structure and artifact names
     board_name_sanitized = sanitize_lower(board_name)
-    revision = identifier_get_revision(board_name)
     project_sample_name = f"{board_name_sanitized}/{sample_name}"
 
     # Create artifacts location
@@ -617,6 +616,17 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
     platform_full_name = get_full_name(board_yaml_data)
     arch = board_yaml_data["arch"]
 
+    (identifier_platform, identifier_revision, identifier_soc, identifier_variant) = identifier_split(board_name)
+    if identifier_revision == '':
+        try:
+            identifier_revision = board_common_yaml_data["board"]["revision"]["default"]
+        except KeyError:
+            # it's fine, this is not guaranteed that the default revision is provided at all for the board
+            pass
+
+    identifier_revision = identifier_revision if identifier_revision else 'default'
+    identifier_variant = identifier_variant if identifier_variant else 'default'
+
     # XXX:
     # * the `dts_include_chain` is used by the Renodepedia as a data input
     # * uses _non-flattened_ device tree
@@ -637,7 +647,10 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
         "memory": run.get_memory_usage(),
         "dts_include_chain": dts_include_chain,
         "arch_bits" : run.arch_bits,
-        "platform_revision": revision,
+        "identifier_revision": identifier_revision,
+        "identifier_platform": identifier_platform,
+        "identifier_soc": identifier_soc,
+        "identifier_variant": identifier_variant
     }
 
     info = "Success!" if run.success else "Fail!"
