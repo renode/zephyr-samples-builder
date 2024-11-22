@@ -178,6 +178,64 @@ def collective_result(aggregated_results: list):
     return collective
 
 
+def collective_result_aggregating_revisions_and_variants(aggregated_results: list):
+    """
+    Process aggregated build result into a single dict organized by board names with
+    different revisions and variants of the same board combined into a single entry.
+    """
+    collective = dict()
+
+    # Find duplicated board names.
+    names = set()
+    duplicates = set()
+    first_sample_name = next(iter(config.samples))
+    for result in aggregated_results:
+        if result["sample_name"] != first_sample_name:
+            continue
+        name = result["platform_full_name"]
+        if name in names:
+            duplicates.add(name)
+        names.add(name)
+    del names
+
+    for result in aggregated_results:
+        sample_name = result["sample_name"]
+        soc = ''
+
+        if dts_chain := result.get('dts_include_chain'):
+            soc = soc_info(dts_chain)
+
+        platform = result["identifier_platform"]
+        revision = result["identifier_revision"]
+        variant = result["identifier_variant"]
+
+        # If the pretty name is not unique, append its revision.
+        if result["platform_full_name"] in duplicates and (revision != 'default'):
+            result["platform_full_name"] += f' ({revision})'
+
+        if platform not in collective:
+            collective[platform] = dict(
+                    arch=result["arch"],
+                    arch_bits=result["arch_bits"],
+                    name=result["board_name"],
+                    full_name=result["platform_full_name"],
+                    revisions=dict(),
+                    soc=soc)
+
+        if revision not in collective[platform]["revisions"]:
+            collective[platform]["revisions"][revision] = { "variants": dict() }
+
+        if variant not in collective[platform]["revisions"][revision]["variants"]:
+            collective[platform]["revisions"][revision]["variants"][variant] = { 
+                "target_identifier": result["platform"],
+                "samples": dict() 
+            }
+
+        collective[platform]["revisions"][revision]["variants"][variant]["samples"][sample_name] = dict(
+            status="BUILT" if result["success"] else "NOT BUILT",
+            extended_memory=result["extended_memory"])
+
+    return collective
 
 
 def minimal_csv_result(aggregated_results: list):
@@ -209,7 +267,10 @@ def main(args):
 
     if args.generate_final_build_results:
         summary_data = aggregate_json_files(args.data_dir, args.file_pattern)
-        summary_data = collective_result(summary_data)
+        if args.aggregate_revisions_and_variants:
+            summary_data = collective_result_aggregating_revisions_and_variants(summary_data)
+        else:
+            summary_data = collective_result(summary_data)
         print(json.dumps(summary_data))
 
     if args.print_table or args.print_stats or args.generate_csv:
@@ -251,6 +312,12 @@ if __name__ == "__main__":
         action="store",
         default=".+\.json",
         help="Operate on files matching the provided pattern"
+    )
+    ap.add_argument(
+        "--aggregate-revisions-and-variants",
+        action="store_true",
+        default=False,
+        help="Generate a result file aggregating boards, revisions and variants",
     )
     ap.add_argument(
         "--join-partial-build-results",
