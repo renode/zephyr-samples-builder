@@ -156,8 +156,9 @@ def collective_result(aggregated_results: list):
         if dts_chain := result.get('dts_include_chain'):
             soc = soc_info(dts_chain)
 
-        # If the pretty name is not unique, append its revision.
-        if result["platform_full_name"] in duplicates and (revision := result.get("identifier_revision")):
+        # If the pretty name is not unique, append its revision (if not default)
+        revision = result.get("identifier_revision")
+        if result["platform_full_name"] in duplicates and revision != 'default':
             result["platform_full_name"] += f' ({revision})'
 
         if platform not in collective:
