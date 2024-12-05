@@ -641,6 +641,8 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
     # * uses _non-flattened_ device tree
     dts_include_chain = get_dts_include_chain(arch, get_dts_by_identifier(board_dir, board_name, board_yaml_path))
 
+    vendor = board_dir.removeprefix("boards/").split('/')[0]
+
     result = {
         "platform": board_name_sanitized,
         "platform_original": board_name,
@@ -660,7 +662,8 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
         "identifier_revision": identifier_revision,
         "identifier_platform": identifier_platform,
         "identifier_soc": identifier_soc,
-        "identifier_variant": identifier_variant
+        "identifier_variant": identifier_variant,
+        'vendor': vendor,
     }
 
     info = "Success!" if run.success else "Fail!"
