@@ -641,6 +641,7 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
     # * uses _non-flattened_ device tree
     dts_include_chain = get_dts_include_chain(arch, get_dts_by_identifier(board_dir, board_name, board_yaml_path))
 
+    board_dir = '/'.join(board_dir.split('/')[2:])  # Drop 'zephyrproject/zephyr' from the path
     vendor = board_dir.removeprefix("boards/").split('/')[0]
 
     result = {
@@ -655,7 +656,7 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
         "arch": arch,
         "platform_full_name": platform_full_name, # a full name of the platform, possibly with the software variant and board revision part
         "board_name": platform_name, # a name that should not include software variant or board revision version
-        "board_dir": '/'.join(board_dir.split('/')[2:]),  # Drop 'zephyrproject/zephyr' from the path
+        "board_dir": board_dir,
         "memory": run.get_memory_usage(),
         "dts_include_chain": dts_include_chain,
         "arch_bits" : run.arch_bits,
