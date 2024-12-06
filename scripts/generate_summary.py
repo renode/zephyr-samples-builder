@@ -221,7 +221,9 @@ def collective_result_aggregating_revisions_and_variants(aggregated_results: lis
                     name=result["board_name"],
                     full_name=result["platform_full_name"],
                     revisions=dict(),
-                    soc=soc)
+                    soc=soc,
+                    vendor=result["vendor"],
+                )
 
         if revision not in collective[platform]["revisions"]:
             collective[platform]["revisions"][revision] = { "variants": dict() }
