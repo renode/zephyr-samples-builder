@@ -635,6 +635,7 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
 
     identifier_revision = identifier_revision if identifier_revision else 'default'
     identifier_variant = identifier_variant if identifier_variant else 'default'
+    identifier_soc = identifier_soc if identifier_soc else 'default'
 
     # XXX:
     # * the `dts_include_chain` is used by the Renodepedia as a data input

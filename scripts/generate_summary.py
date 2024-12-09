@@ -208,6 +208,7 @@ def collective_result_aggregating_revisions_and_variants(aggregated_results: lis
 
         platform = result["identifier_platform"]
         revision = result["identifier_revision"]
+        soc_variant = result["identifier_soc"]
         variant = result["identifier_variant"]
 
         # If the pretty name is not unique, append its revision.
@@ -226,15 +227,18 @@ def collective_result_aggregating_revisions_and_variants(aggregated_results: lis
                 )
 
         if revision not in collective[platform]["revisions"]:
-            collective[platform]["revisions"][revision] = { "variants": dict() }
+            collective[platform]["revisions"][revision] = { "socs": dict() }
 
-        if variant not in collective[platform]["revisions"][revision]["variants"]:
-            collective[platform]["revisions"][revision]["variants"][variant] = { 
+        if soc_variant not in collective[platform]["revisions"][revision]["socs"]:
+            collective[platform]["revisions"][revision]["socs"][soc_variant] = { "variants": dict() }
+
+        if variant not in collective[platform]["revisions"][revision]["socs"][soc_variant]["variants"]:
+            collective[platform]["revisions"][revision]["socs"][soc_variant]["variants"][variant] = { 
                 "target_identifier": result["platform"],
                 "samples": dict() 
             }
 
-        collective[platform]["revisions"][revision]["variants"][variant]["samples"][sample_name] = dict(
+        collective[platform]["revisions"][revision]["socs"][soc_variant]["variants"][variant]["samples"][sample_name] = dict(
             status="BUILT" if result["success"] else "NOT BUILT",
             extended_memory=result["extended_memory"])
 
