@@ -56,6 +56,15 @@ def __getattr__(name):
     return attr
 
 
+def omit_samples(data):
+    filtered_samples = {
+        key: value for key, value in data["samples"].items()
+        if not value.get("omit_in_results", False)
+    }
+    data["samples"] = filtered_samples
+    return data
+
+
 if __name__ == "__main__":
     load()
-    json.dump(_dict, sys.stdout)
+    json.dump(omit_samples(_dict), sys.stdout)

@@ -73,8 +73,10 @@ samples:
     path: "kenning-zephyr-runtime/demo_app/"
     workspace: "kenning-zephyr-workspace"
     extra_args: "-DEXTRA_CONF_FILE=tvm_int8.conf"
+    omit_in_results: True
   kenning-zephyr-runtime-tflitemicro-quantized:
     name: "Kenning TFLite Micro"
     path: "kenning-zephyr-runtime/demo_app/"
     workspace: "kenning-zephyr-workspace"
     extra_args: "-DEXTRA_CONF_FILE=tflite_int8.conf"
+    omit_in_results: True
