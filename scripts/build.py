@@ -56,7 +56,7 @@ class YAMLNotFoundException(Exception):
 
 
 class SampleBuilder:
-    def __init__(self, platform: str, sample_path: str, sample_name: str, sample_workspace: str | None) -> None:
+    def __init__(self, platform: str, sample_path: str, sample_name: str, sample_workspace: str | None, dry_run: bool = False) -> None:
         # Parameters
         self.platform = platform
         self.config = config
@@ -66,6 +66,10 @@ class SampleBuilder:
 
         self.args = {}
         self.overlays = {}
+        self.dry_run = dry_run
+
+        if self.dry_run:
+            print(f"{red('WARNING')} SampleBuilder is running in {bold('dry_run')} mode! No binary will be generated.")
 
         self.log_file = tempfile.mkstemp(suffix='_log', text=True)[1]
 
@@ -122,14 +126,14 @@ class SampleBuilder:
             if original_dts is not None:
                 self._copy_original_dts_file(original_dts)
 
-        fail, west_output = self._build()
+        fail, west_output = self._build(prepare_only=self.dry_run)
 
         if fail:
             fail = self._check_extend_memory(west_output)
 
         arifacts = self.get_artifacts()
 
-        self.success = (not fail) and ("elf" in arifacts) and self._check_kconfig_requirements()
+        self.success = not fail and self._check_kconfig_requirements() and (self.dry_run or "elf" in arifacts)
 
         self.arch_bits = 32
         if self._check_if_64bit():
@@ -539,7 +543,7 @@ def get_board_yaml_path(board_dir, board_name):
     return yamlpath
 
 
-def main(board_dir: str, board_name: str, sample_name: str) -> None:
+def main(board_dir: str, board_name: str, sample_name: str, dry_run: bool = False) -> None:
     """
     Main function to build a Zephyr sample for a specific board and create relevant artifacts.
 
@@ -554,7 +558,7 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
     config_path = f'configs/{sample_name}.conf'
     overlay_path = f'overlays/{board_name}.overlay'
 
-    run = SampleBuilder(board_name, sample_path, sample_name, sample_workspace)
+    run = SampleBuilder(board_name, sample_path, sample_name, sample_workspace, dry_run)
 
     # Check for sample prj.conf overlay
     if os.path.exists(config_path):
@@ -676,7 +680,7 @@ def main(board_dir: str, board_name: str, sample_name: str) -> None:
     with open(results_json_name, "w") as f:
         json.dump(result, f)
 
-    if result["success"]:
+    if not dry_run and result["success"]:
         # Create MD5 hash file for the binary
         with open(elf_md5_name, "w") as f:
             f.write(calculate_md5(elf_name))
@@ -693,6 +697,7 @@ if __name__ == "__main__":
     ap.add_argument("sample_name")
     ap.add_argument("-j", "--job-number")
     ap.add_argument("-J", "--jobs-total")
+    ap.add_argument("-n", "--dry-run", action='store_true')
     args, _ = ap.parse_known_args()
 
     config.load()
@@ -701,12 +706,13 @@ if __name__ == "__main__":
     board_dir = args.board_dir
     board_name = args.board_name
     sample_name = args.sample_name
+    dry_run = args.dry_run
 
     if multijob:
         start_time = time.time()
         print_frame(f"job {args.job_number} / {args.jobs_total} started")
 
-    main(board_dir, board_name, sample_name)
+    main(board_dir, board_name, sample_name, dry_run)
 
     if multijob:
         total_time = time.time() - start_time
