@@ -61,6 +61,17 @@ done
 west zephyr-export
 cd ..
 
+# Download Zephyr maintained rust sample
+mkdir -p zephyr_rust/apptest
+cd zephyr_rust/apptest
+git init
+git remote add origin https://github.com/zephyrproject-rtos/zephyr-lang-rust
+git pull --depth 1 origin main
+cd ..
+west init -l apptest --mf ci-manifest.yml
+west update -o=--depth=1 -o=--no-tags -n
+cd ..
+
 # Prepare Kenning Zephyr Runtime Demo application
 # This demo uses a custom workspace (west.yaml configuration)
 mkdir -p kenning-zephyr-workspace/kenning-zephyr-runtime
