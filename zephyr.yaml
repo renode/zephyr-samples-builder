@@ -51,9 +51,9 @@ samples:
     path: "samples/../zephyr-rust/samples/rust-app"
     kconfig:
       - 'CONFIG_USERSPACE=y'
- zephyr-lang-rust-hello-world:
-   name: "Rust Hello World"
-   path: "../../zephyr_rust/apptest/samples/hello_world"
+  zephyr-lang-rust-hello-world:
+    name: "Rust Hello World"
+    path: "../../zephyr_rust/apptest/samples/hello_world"
   # The kenning-zephyr-runtime-{microtvm,tflitemicro,iree} samples
   # use the same source, but are built with different config files
   kenning-zephyr-runtime-microtvm:
