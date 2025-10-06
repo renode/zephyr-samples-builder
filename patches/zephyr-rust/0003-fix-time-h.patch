@@ -1,0 +1,33 @@
+From 9958a748e8cbf0ca5152fc0467a9c98da0a24f42 Mon Sep 17 00:00:00 2001
+From: Patryk Koscik <pkoscik@antmicro.com>
+Date: Mon, 6 Oct 2025 16:05:03 +0200
+Subject: [PATCH] Fix time.h
+
+---
+ scripts/gen_syscalls.py | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/scripts/gen_syscalls.py b/scripts/gen_syscalls.py
+index bf63be6..ec2a137 100755
+--- a/scripts/gen_syscalls.py
++++ b/scripts/gen_syscalls.py
+@@ -145,7 +145,7 @@ def main():
+     # where the syscall header is not included, so we must not include the
+     # syscall header directly.
+     whitelist = set(["kernel.h", "kobject.h", "device.h", "uart.h", "mutex.h", "errno_private.h", "eeprom.h", "time.h"])
+-    includes = ["kernel.h", "device.h", "drivers/uart.h", "sys/mutex.h", "sys/errno_private.h", "drivers/eeprom.h", "posix/time.h"]
++    includes = ["kernel.h", "device.h", "drivers/uart.h", "sys/mutex.h", "sys/errno_private.h", "drivers/eeprom.h"]
+ 
+     for match_group, fn, *rest in syscalls:
+         if fn not in whitelist:
+@@ -171,6 +171,7 @@ def main():
+         # Hack because z_sys_mutex_kernel_lock is not defined in sys/mutex.h for !USERSPACE
+         # This is the same on all zephyr versions as it exists in include/generated
+         fp.write("#include <syscalls/mutex.h>\n")
++        fp.write("#include <time.h>\n")
+         fp.write("\n")
+         fp.write("".join(declarations))
+         fp.write("\n#endif\n")
+-- 
+2.51.0
+
