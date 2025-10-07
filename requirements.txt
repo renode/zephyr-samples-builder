@@ -3,3 +3,6 @@ Jinja2
 colorama==0.4.*
 nrf-regtool==5.6.*
 kenning[tvm,tensorflow,iree] @ git+https://github.com/antmicro/kenning.git
+
+# XXX(pkoscik): temporary workaround - KZR dependency
+dts2repl @ git+https://github.com/antmicro/dts2repl.git
