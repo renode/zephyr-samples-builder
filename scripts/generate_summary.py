@@ -152,9 +152,7 @@ def collective_result(aggregated_results: list):
     for result in aggregated_results:
         sample_name = result["sample_name"]
         platform = result["platform"]
-        soc = ''
-        if dts_chain := result.get('dts_include_chain'):
-            soc = soc_info(dts_chain)
+        soc = result["soc"]
 
         # If the pretty name is not unique, append its revision (if not default)
         revision = result.get("identifier_revision")
@@ -201,10 +199,7 @@ def collective_result_aggregating_revisions_and_variants(aggregated_results: lis
 
     for result in aggregated_results:
         sample_name = result["sample_name"]
-        soc = ''
-
-        if dts_chain := result.get('dts_include_chain'):
-            soc = soc_info(dts_chain)
+        soc = result["soc"]
 
         platform = result["identifier_platform"]
         revision = result["identifier_revision"]
