@@ -543,6 +543,23 @@ def get_board_yaml_path(board_dir, board_name):
     return yamlpath
 
 
+def get_board_socs_hwmv2(board_yml, board_name):
+    if 'board' in board_yml:
+        # single board schema
+        return [item['name'] for item in board_yml['board']['socs']]
+    elif 'boards' in board_yml:
+        # multi-board schema with multiple boards
+        sanitized_board = board_name.split('@')[0].split('/')[0]
+        return [
+            item['name']
+            for board_candidate in board_yml['boards']
+            for item in board_candidate['socs']
+            if board_candidate['name'] == sanitized_board
+        ]
+
+    return None
+
+
 def main(board_dir: str, board_name: str, sample_name: str, dry_run: bool = False) -> None:
     """
     Main function to build a Zephyr sample for a specific board and create relevant artifacts.
@@ -670,6 +687,7 @@ def main(board_dir: str, board_name: str, sample_name: str, dry_run: bool = Fals
         "identifier_soc": identifier_soc,
         "identifier_variant": identifier_variant,
         'vendor': vendor,
+        "soc": get_board_socs_hwmv2(board_common_yaml_data, board_name),
     }
 
     info = "Success!" if run.success else "Fail!"
