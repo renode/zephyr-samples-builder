@@ -75,10 +75,19 @@ cd ..
 # Prepare Kenning Zephyr Runtime Demo application
 # This demo uses a custom workspace (west.yaml configuration)
 mkdir -p kenning-zephyr-workspace/kenning-zephyr-runtime
-cd kenning-zephyr-workspace/kenning-zephyr-runtime
-git init > /dev/null 2> /dev/null
-git remote add origin https://github.com/antmicro/kenning-zephyr-runtime
-git pull --depth 1 origin ${KENNING_ZEPHYR_RUNTIME_VERSION} > /dev/null 2> /dev/null
+
+if [[ "$BUILD_KZR_ONLY" == "true" ]]; then
+    cd kenning-zephyr-workspace
+    git clone https://github.com/antmicro/kenning-zephyr-runtime kenning-zephyr-runtime > /dev/null 2> /dev/null
+    cd kenning-zephyr-runtime
+    echo "using latest KZR version"
+else
+    cd kenning-zephyr-workspace/kenning-zephyr-runtime
+    git init > /dev/null 2> /dev/null
+    git remote add origin https://github.com/antmicro/kenning-zephyr-runtime
+    git pull --depth 1 origin ${KENNING_ZEPHYR_RUNTIME_VERSION} > /dev/null 2> /dev/null
+    echo "using KZR version from .env"
+fi
 
 # Initialize another zephyr workspace
 west init -l .

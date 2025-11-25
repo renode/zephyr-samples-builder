@@ -1,0 +1,48 @@
+project: "zephyr"
+project_name: "Zephyr"
+project_git_tree: "https://github.com/zephyrproject-rtos/zephyr/tree"
+project_path: "zephyrproject/zephyr"
+
+artifact_prefix: "build/{board_name}/{sample_name}/"
+artifact_names:
+  build-log:   "{sample_name}.log"
+  config:      "{sample_name}-config"
+  dts:         "{sample_name}.dts"
+  elf:         "{sample_name}.elf"
+  elf-md5:     "{sample_name}.elf.md5"
+  sbom-app:    "{sample_name}-app.spdx"
+  sbom-build:  "{sample_name}-build.spdx"
+  sbom-zephyr: "{sample_name}-zephyr.spdx"
+  zip-sbom:    "{sample_name}-sbom.zip"
+  result:      "{sample_name}-result.json"
+
+samples:
+  # The kenning-zephyr-runtime-{microtvm,tflitemicro,iree} samples
+  # use the same source, but are built with different config files
+  kenning-zephyr-runtime-microtvm:
+    name: "Kenning microTVM"
+    path: "kenning-zephyr-runtime/demo_app/"
+    workspace: "kenning-zephyr-workspace"
+    extra_args: "-DEXTRA_CONF_FILE=tvm.conf"
+  kenning-zephyr-runtime-tflitemicro:
+    name: "Kenning TFLite Micro"
+    path: "kenning-zephyr-runtime/demo_app/"
+    workspace: "kenning-zephyr-workspace"
+    extra_args: "-DEXTRA_CONF_FILE=tflite.conf"
+  kenning-zephyr-runtime-iree:
+    name: "Kenning IREE"
+    path: "kenning-zephyr-runtime/demo_app/"
+    workspace: "kenning-zephyr-workspace"
+    extra_args: "-DEXTRA_CONF_FILE=iree_vmvx.conf"
+  kenning-zephyr-runtime-microtvm-quantized:
+    name: "Kenning microTVM"
+    path: "kenning-zephyr-runtime/demo_app/"
+    workspace: "kenning-zephyr-workspace"
+    extra_args: "-DEXTRA_CONF_FILE=tvm_int8.conf"
+    omit_in_results: True
+  kenning-zephyr-runtime-tflitemicro-quantized:
+    name: "Kenning TFLite Micro"
+    path: "kenning-zephyr-runtime/demo_app/"
+    workspace: "kenning-zephyr-workspace"
+    extra_args: "-DEXTRA_CONF_FILE=tflite_int8.conf"
+    omit_in_results: True
