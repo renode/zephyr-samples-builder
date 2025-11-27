@@ -76,7 +76,7 @@ cd ..
 # This demo uses a custom workspace (west.yaml configuration)
 mkdir -p kenning-zephyr-workspace/kenning-zephyr-runtime
 
-if [[ "$BUILD_KZR_ONLY" == "true" ]]; then
+if [[ -n "${BUILD_KZR_ONLY+x}" && "$BUILD_KZR_ONLY" == "true" ]]; then
     cd kenning-zephyr-workspace
     git clone https://github.com/antmicro/kenning-zephyr-runtime kenning-zephyr-runtime > /dev/null 2> /dev/null
     cd kenning-zephyr-runtime
