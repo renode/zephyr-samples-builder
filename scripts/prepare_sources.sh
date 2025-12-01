@@ -100,5 +100,6 @@ west zephyr-export
 # Checkout proper Zephyr version for the kenning samples
 cd ../zephyr
 git checkout $ZEPHYR_VERSION
+west update -o=--no-tags
 cd ../..
 
