@@ -5,3 +5,5 @@ zephyr-sdk/
 zephyrproject/
 artifacts
 build/
+.venv/
+zephyr_rust/
