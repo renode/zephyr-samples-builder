@@ -43,9 +43,12 @@ samples:
   synchronization:
     name: "Synchronization"
     path: "samples/synchronization"
-  lz4:
-    name: "Compression: LZ4"
-    path: "samples/modules/compression/lz4"
+  posix_eventfd:
+    name: "POSIX: eventfd"
+    path: "samples/posix/eventfd"
+  posix_uname:
+    name: "POSIX: uname"
+    path: "samples/posix/uname"
   rust-app:
     name: "Rust app"
     path: "samples/../zephyr-rust/samples/rust-app"
