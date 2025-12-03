@@ -89,6 +89,9 @@ else
     echo "using KZR version from .env"
 fi
 
+# Checkout proper Zephyr version for the kenning samples
+../../scripts/change_kzr_zephyr_rev.py --file west.yml --revision $ZEPHYR_VERSION
+
 # Initialize another zephyr workspace
 west init -l .
 west update -o=--no-tags
@@ -96,9 +99,3 @@ west zephyr-export
 
 # Prepare required modules
 ./scripts/prepare_modules.sh
-
-# Checkout proper Zephyr version for the kenning samples
-cd ../zephyr
-git checkout $ZEPHYR_VERSION
-cd ../..
-
