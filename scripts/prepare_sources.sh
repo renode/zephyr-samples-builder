@@ -94,7 +94,7 @@ fi
 
 # Initialize another zephyr workspace
 west init -l .
-west update -o=--no-tags
+west update -o=--depth=1 -o=--no-tags -n
 west zephyr-export
 
 # Prepare required modules
