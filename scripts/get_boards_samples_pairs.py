@@ -12,18 +12,30 @@ def get_yaml_identifiers(directory: str, filter_archs: list | None = None, filte
 
     all_boards = {}
     for root, dirs, files in os.walk(directory):
+        # Reject bindings and configuration files
+        if 'dts/bindings' in root or 'support' in root:
+            continue
         for file in files:
             if file.endswith('.yaml'):
                 file_path = os.path.join(root, file)
                 with open(file_path, 'r') as f:
                     try:
                         data = yaml.safe_load(f)
-                        identifier = data['identifier']
                         if filter_archs and data['arch'] in filter_archs:
                             continue
-                        if filter_targets and any(target in identifier for target in filter_targets):
-                            continue
-                        all_boards[identifier] = root
+                        if 'identifier' in data:
+                            identifier = data['identifier']
+                            if filter_targets and any(target in identifier for target in filter_targets):
+                                continue
+                            all_boards[identifier] = root
+                        elif 'variants' in data:
+                            for identifier in data['variants'].keys():
+                                if filter_targets and any(target in identifier for target in filter_targets):
+                                    continue
+                                all_boards[identifier] = root
+                        else:
+                            raise KeyError("unrecognized file structure")
+
                     except yaml.YAMLError as e:
                         dprint(f"Error reading {file_path}: {e}")
                     except KeyError as e:
