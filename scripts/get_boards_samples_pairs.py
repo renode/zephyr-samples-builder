@@ -23,6 +23,12 @@ def get_yaml_identifiers(directory: str, filter_archs: list | None = None, filte
                         data = yaml.safe_load(f)
                         if filter_archs and data['arch'] in filter_archs:
                             continue
+                        if not os.path.isfile(os.path.join(root, "board.yml")):
+                            # Reject the target if `root/board.yml` is missing.
+                            # This covers an edge case where the `twister.yaml`
+                            # file is located in the vendor directory tree; for
+                            # example `mediatek/twister.yaml`.
+                            continue
                         if 'identifier' in data:
                             identifier = data['identifier']
                             if filter_targets and any(target in identifier for target in filter_targets):
