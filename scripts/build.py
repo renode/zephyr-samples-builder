@@ -514,7 +514,7 @@ def get_full_name(full_board_name):
 def get_board_yaml_path_by_identifier(board_dir: str, board_name: str) -> str:
     """
     Attempt to parse all .yaml files inside `board_dir`.
-    If any yaml file identifier matches the board_name -> return yaml file location,
+    If any yaml file identifier or variant matches the board_name -> return yaml file location
     In case no matches are made, raise YAMLNotFoundException.
     """
     for root, dirs, files in os.walk(board_dir):
@@ -524,12 +524,12 @@ def get_board_yaml_path_by_identifier(board_dir: str, board_name: str) -> str:
                 with open(file_path, 'r') as f:
                     try:
                         data = yaml.safe_load(f)
-                        if data['identifier'] == board_name:
+                        if data.get('identifier') == board_name:
+                            return file_path
+                        if 'variants' in data and board_name in data['variants']:
                             return file_path
                     except yaml.YAMLError as e:
                         print(f"Error reading {file_path}: {e}")
-                    except KeyError as e:
-                        print(f"No identifier key in: {file_path}: {e}")
 
     raise YAMLNotFoundException
 
