@@ -1,0 +1,24 @@
+From 3019d3d9ed3656c16ade00978b89c689e055f803 Mon Sep 17 00:00:00 2001
+From: Pawel Reich <preich@internships.antmicro.com>
+Date: Wed, 11 Mar 2026 15:25:18 +0100
+Subject: [PATCH] Lock unicode-ident in genproject
+
+---
+ rust/genproject.sh | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/rust/genproject.sh b/rust/genproject.sh
+index 2ef99d5..3f20ce0 100755
+--- a/rust/genproject.sh
++++ b/rust/genproject.sh
+@@ -21,6 +21,7 @@ crate-type = ["staticlib"]
+ 
+ [dependencies]
+ app = { path = "${crate_dir}" }
++unicode-ident = "=1.0.5"
+ 
+ [profile.release]
+ panic = "abort"
+-- 
+2.53.0
+

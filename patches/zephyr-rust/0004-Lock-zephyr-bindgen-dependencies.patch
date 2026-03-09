@@ -1,0 +1,46 @@
+From 9f1e2b91544c3e443cf6ac85be80190914f6c452 Mon Sep 17 00:00:00 2001
+From: Pawel Reich <preich@internships.antmicro.com>
+Date: Mon, 9 Mar 2026 16:38:15 +0100
+Subject: [PATCH] Lock zephyr-bindgen dependencies
+
+---
+ zephyr-bindgen/Cargo.lock | 5 +++--
+ zephyr-bindgen/Cargo.toml | 3 ++-
+ 2 files changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/zephyr-bindgen/Cargo.lock b/zephyr-bindgen/Cargo.lock
+index be31fed..a09542d 100644
+--- a/zephyr-bindgen/Cargo.lock
++++ b/zephyr-bindgen/Cargo.lock
+@@ -4,9 +4,9 @@ version = 3
+ 
+ [[package]]
+ name = "bindgen"
+-version = "0.61.0"
++version = "0.62.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "8a022e58a142a46fea340d68012b9201c094e93ec3d033a944a24f8fd4a4f09a"
++checksum = "c6720a8b7b2d39dd533285ed438d458f65b31b5c257e6ac7bb3d7e82844dd722"
+ dependencies = [
+  "bitflags",
+  "cexpr",
+@@ -254,4 +254,5 @@ name = "zephyr-bindgen"
+ version = "0.1.0"
+ dependencies = [
+  "bindgen",
++ "unicode-ident",
+ ]
+diff --git a/zephyr-bindgen/Cargo.toml b/zephyr-bindgen/Cargo.toml
+index 7d63088..bf63f26 100644
+--- a/zephyr-bindgen/Cargo.toml
++++ b/zephyr-bindgen/Cargo.toml
+@@ -11,4 +11,5 @@ homepage = "https://github.com/tylerwhall/zephyr-rust"
+ # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+ 
+ [dependencies]
+-bindgen = "0.61.0"
++bindgen = "=0.62.0"
++unicode-ident = "=1.0.5"
+-- 
+2.53.0
+
