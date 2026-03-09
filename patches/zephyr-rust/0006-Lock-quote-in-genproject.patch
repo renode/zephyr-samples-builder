@@ -1,0 +1,26 @@
+From ce330ce6c7bc8360d4daa9e704354a8a54c2163a Mon Sep 17 00:00:00 2001
+From: Pawel Reich <preich@internships.antmicro.com>
+Date: Thu, 12 Mar 2026 11:38:55 +0100
+Subject: [PATCH] Lock quote in genproject
+
+---
+ rust/genproject.sh | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/rust/genproject.sh b/rust/genproject.sh
+index 3f20ce0..b82cc5f 100755
+--- a/rust/genproject.sh
++++ b/rust/genproject.sh
+@@ -22,7 +22,8 @@ crate-type = ["staticlib"]
+ [dependencies]
+ app = { path = "${crate_dir}" }
+ unicode-ident = "=1.0.5"
+-
++[build-dependencies]
++quote = "=1.0.37"
+ [profile.release]
+ panic = "abort"
+ lto = true
+-- 
+2.53.0
+
