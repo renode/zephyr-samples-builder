@@ -634,6 +634,14 @@ def main(board_dir: str, board_name: str, sample_name: str, dry_run: bool = Fals
         print(bold(f"Skipping target due to missing YAML file: {board_name}"))
         return
 
+    if "name" not in board_yaml_data:
+        print(bold(f"Skipping target due to missing name: {board_name}"))
+        return
+    
+    if "arch" not in board_yaml_data:
+        print(bold(f"Skipping target due to missing arch: {board_name}"))
+        return
+
     platform_full_name = get_full_name(board_yaml_data['name'])
 
     # board.yml might have different forms, with a single board or multiple boards;
