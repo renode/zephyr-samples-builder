@@ -3,7 +3,7 @@ set -uxo pipefail
 
 max_attempts=5
 sdk_dir="zephyr-sdk"
-url="https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64.tar.xz"
+url="https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64_gnu.tar.xz"
 
 mkdir -p "${sdk_dir}"
 

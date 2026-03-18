@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euxo pipefail
 
-# This script does not work for SDK versions below 0.16.0
+# This script does not work for SDK versions below 1.0.0
 # This is caused by an URL change from Zephyr SDK release pages
 
 # Download and patch MicroPython
