@@ -1,0 +1,24 @@
+From 105482bd1c18db80d49fd1fbe27e56897e661221 Mon Sep 17 00:00:00 2001
+From: Patryk Koscik <pkoscik@antmicro.com>
+Date: Thu, 19 Mar 2026 13:00:59 +0100
+Subject: [PATCH] Allow for `incompatible-pointer-types`
+
+---
+ CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1d343c5..75ed0ea 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -161,6 +161,7 @@ if (CONFIG_RUST)
+ 
+     # A regular Zephyr C library for our C code
+     zephyr_library_named(rust_c)
++    zephyr_library_compile_options(-Wno-error=incompatible-pointer-types)
+     set(thunk_sources syscall-thunk-any.c)
+     if(CONFIG_USERSPACE)
+         set(thunk_sources ${thunk_sources} syscall-thunk-kernel.c syscall-thunk-user.c)
+-- 
+2.53.0
+
