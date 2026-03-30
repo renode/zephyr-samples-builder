@@ -98,4 +98,4 @@ west update -o=--depth=1 -o=--no-tags -n
 west zephyr-export
 
 # Prepare required modules
-./scripts/prepare_modules.sh
+SKIP_ZEPHELIN=1 ./scripts/prepare_modules.sh
