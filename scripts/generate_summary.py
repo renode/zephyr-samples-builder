@@ -14,6 +14,23 @@ template_loader = jinja2.FileSystemLoader(searchpath="./")
 template_env = jinja2.Environment(loader=template_loader)
 summary_template = template_env.get_template("templates/summary.md")
 
+# Board names where the vendor acronym is also the product acronym, so stripping would
+# produce nonsense.
+VENDOR_PREFIX_KEEP_LIST = {
+    "ACRN on ADL configuration",
+    "ACRN on EHL configuration",
+}
+
+
+def strip_vendor_prefix(name: str, vendor: str) -> tuple[str, bool]:
+    """Strip vendor prefix from name if it starts with vendor (case-insensitive).
+    Returns (stripped_name, was_stripped)."""
+    if name in VENDOR_PREFIX_KEEP_LIST:
+        return name, False
+    if name.lower().startswith(vendor.lower() + " "):
+        return name[len(vendor):].lstrip(), True
+    return name, False
+
 
 def aggregate_json_files(directory: str, pattern: str) -> list:
     """
@@ -214,7 +231,7 @@ def collective_result_aggregating_revisions_and_variants(aggregated_results: lis
             collective[platform] = dict(
                     arch=result["arch"],
                     arch_bits=result["arch_bits"],
-                    name=result["board_name"],
+                    name=strip_vendor_prefix(result["board_name"], result["vendor"])[0],
                     full_name=result["platform_full_name"],
                     revisions=dict(),
                     soc=soc,
@@ -238,6 +255,31 @@ def collective_result_aggregating_revisions_and_variants(aggregated_results: lis
             extended_memory=result["extended_memory"])
 
     return collective
+
+
+def _has_vendor_prefix(name: str, vendor: str) -> bool:
+    return strip_vendor_prefix(name, vendor)[1]
+
+
+def report_vendor_issues(aggregated_results: list):
+    """Print a report of boards where vendor name was found in full_name and stripped."""
+    seen = {}
+    for result in aggregated_results:
+        vendor = result.get("vendor", "")
+        board_name = result["board_name"]
+        if _has_vendor_prefix(board_name, vendor):
+            platform = result["platform"]
+            if platform not in seen:
+                seen[platform] = {
+                    "vendor": vendor,
+                    "board_name": board_name,
+                }
+    if not seen:
+        return
+    print(f"\nWARNING: {len(seen)} board(s) had vendor name in full_name:")
+    for platform, info in sorted(seen.items()):
+        print(f"\t{platform}: vendor={info['vendor']!r} board_name={info['board_name']!r}")
+    print()
 
 
 def minimal_csv_result(aggregated_results: list):
@@ -277,6 +319,7 @@ def main(args):
 
     if args.print_table or args.print_stats or args.generate_csv:
         summary_data = aggregate_json_files(args.data_dir, args.file_pattern)
+        report_vendor_issues(summary_data)
         # Data for markdown table
         stats = generate_stats(summary_data)
 
