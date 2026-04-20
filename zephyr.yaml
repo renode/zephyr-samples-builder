@@ -45,7 +45,7 @@ samples:
     path: "samples/synchronization"
   posix_eventfd:
     name: "POSIX: eventfd"
-    path: "samples/posix/eventfd"
+    path: "samples/subsys/portability/posix/eventfd/"
   rust-app:
     name: "Rust app"
     path: "samples/../zephyr-rust/samples/rust-app"
