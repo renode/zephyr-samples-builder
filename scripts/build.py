@@ -207,7 +207,13 @@ class SampleBuilder:
             for type in ['FLASH', 'RAM']:
                 if type in memory:
                     node_name = self._get_alternative_node_name(type, self.dts_original)
-                    _, node_size = find_node_size(node_name, self.dts_original)
+                    result = find_node_size(node_name, self.dts_original)
+                    # Can happen when the board uses a non-standard DTS node name
+                    # that isn't covered by _get_alternative_node_name's mapping.
+                    if result is None:
+                        print(f"Warning: could not find DTS node for {type} ({node_name}), skipping size update")
+                        continue
+                    _, node_size = result
                     node_size = int(node_size[-1], 16)
                     memory[type].update({
                         'size': node_size,
