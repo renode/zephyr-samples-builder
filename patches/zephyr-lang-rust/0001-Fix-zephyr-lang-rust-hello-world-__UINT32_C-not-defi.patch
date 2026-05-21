@@ -1,0 +1,34 @@
+From 567ee4ecd02cc8f67d9e53494efa7629d8b216e0 Mon Sep 17 00:00:00 2001
+From: Pawel Reich <preich@internships.antmicro.com>
+Date: Thu, 21 May 2026 10:11:58 +0200
+Subject: [PATCH] Fix `zephyr-lang-rust-hello-world` __UINT32_C not defined
+
+---
+ zephyr-sys/wrapper.h | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/zephyr-sys/wrapper.h b/zephyr-sys/wrapper.h
+index 577ce08..fd45380 100644
+--- a/zephyr-sys/wrapper.h
++++ b/zephyr-sys/wrapper.h
+@@ -36,6 +36,17 @@ extern int errno;
+ #endif
+ #endif
+ 
++#if defined(__clang__) && !defined(__UINT32_C)
++#define __INT8_C(c) c
++#define __INT16_C(c) c
++#define __INT32_C(c) c
++#define __INT64_C(c) c##LL
++#define __UINT8_C(c) c
++#define __UINT16_C(c) c
++#define __UINT32_C(c) c##U
++#define __UINT64_C(c) c##ULL
++#endif
++
+ #include <zephyr/kernel.h>
+ #include <zephyr/kernel/thread_stack.h>
+ #include <zephyr/drivers/gpio.h>
+-- 
+2.54.0
+
