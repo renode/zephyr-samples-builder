@@ -1,0 +1,28 @@
+From ba096c2dae25e9295564d31b435b5debf08fcc88 Mon Sep 17 00:00:00 2001
+From: Jakub Klimczak <jklimczak@internships.antmicro.com>
+Date: Thu, 11 Jun 2026 15:42:03 +0200
+Subject: [PATCH] Prepend python-devicetree to sys.path instead of appending
+
+gen_mmu.py would throw errors if the package devicetree
+from PyPI was installed. This patch ensures the right
+module is loaded.
+---
+ arch/x86/gen_mmu.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/x86/gen_mmu.py b/arch/x86/gen_mmu.py
+index 444c9dfc9bd..570947dd602 100755
+--- a/arch/x86/gen_mmu.py
++++ b/arch/x86/gen_mmu.py
+@@ -81,7 +81,7 @@ from elftools.elf.elffile import ELFFile
+ from elftools.elf.sections import SymbolTableSection
+ from packaging import version
+ 
+-sys.path.append(str(Path(__file__).parents[2] / "scripts" / "dts" / "python-devicetree" / "src"))
++sys.path.insert(0, str(Path(__file__).parents[2] / "scripts" / "dts" / "python-devicetree" / "src"))
+ from devicetree import edtlib  # noqa: F401
+ 
+ if version.parse(elftools.__version__) < version.parse('0.24'):
+-- 
+2.47.3
+
