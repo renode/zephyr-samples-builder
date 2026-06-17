@@ -1,6 +1,6 @@
 # Zephyr Samples Builder
 
-Copyright (c) 2023-2024 [Antmicro](https://www.antmicro.com)
+Copyright (c) 2023-2026 [Antmicro](https://www.antmicro.com)
 
 A set of CI pipeline tools for building Zephyr RTOS samples for multiple platforms.
 
