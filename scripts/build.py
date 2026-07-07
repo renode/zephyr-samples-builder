@@ -85,6 +85,7 @@ class SampleBuilder:
     # Constants
     ARTIFACTS = {
         "elf": "zephyr/zephyr.elf",
+        "bin": "zephyr/zephyr.bin",
         "dts": "zephyr/zephyr.dts",
         "config": "zephyr/.config",
         "spdx_app": "spdx/app.spdx",
@@ -623,6 +624,8 @@ def main(board_dir: str, board_name: str, sample_name: str, dry_run: bool = Fals
             shutil.copyfile(path, f"build/{project_sample_name}/{sample_name}.dts")
         elif key == "config":
             shutil.copyfile(path, f"build/{project_sample_name}/{sample_name}-config")
+        elif key == "bin":
+            shutil.copyfile(path, f"build/{project_sample_name}/{sample_name}.bin")
 
     format_args = {
         "board_name": board_name_sanitized,

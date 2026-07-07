@@ -9,6 +9,7 @@ artifact_names:
   config:      "{sample_name}-config"
   dts:         "{sample_name}.dts"
   elf:         "{sample_name}.elf"
+  bin:         "{sample_name}.bin"
   elf-md5:     "{sample_name}.elf.md5"
   sbom-app:    "{sample_name}-app.spdx"
   sbom-build:  "{sample_name}-build.spdx"
