@@ -46,6 +46,8 @@ dts_overlay_template = templateEnv.get_template('templates/overlay.dts')
 
 # Per-`west` command timeout; a hung build (e.g. runaway IREE/cc1plus) is killed and recorded as a failure so the run continues
 BUILD_TIMEOUT = int(os.environ.get("BUILD_TIMEOUT", "1200"))        # 20 min
+# Liveness line every N seconds while a command runs (only long builds ever print)
+HEARTBEAT_INTERVAL = int(os.environ.get("BUILD_HEARTBEAT", "300"))  # 5 min
 
 
 @contextlib.contextmanager
@@ -239,6 +241,40 @@ class SampleBuilder:
             print(f"Preserving original DTS file at {dts_original_path}")
             shutil.copyfile(dts_original_path, self.dts_original)
 
+    def _last_log_line(self) -> str:
+        """Last non-empty line of the build log, for heartbeat/trace output."""
+        try:
+            with open(self.log_file, errors="replace") as f:
+                lines = [l.strip() for l in f if l.strip()]
+            return lines[-1] if lines else "(no output yet)"
+        except OSError:
+            return "(log unavailable)"
+
+    @contextlib.contextmanager
+    def _heartbeat(self):
+        """
+            Print a liveness line every HEARTBEAT_INTERVAL while a command runs (elapsed
+            time + last log line), so a slow build is distinguishable from a dead one.
+        """
+        stop = threading.Event()
+        t0 = time.time()
+
+        def beat():
+            while not stop.wait(HEARTBEAT_INTERVAL):
+                elapsed = int(time.time() - t0)
+                last = self._last_log_line()
+                if len(last) > 120:
+                    last = last[:117] + "..."
+                print(f"[heartbeat] running {elapsed}s, last: {last}", flush=True)
+
+        thread = threading.Thread(target=beat, daemon=True)
+        thread.start()
+        try:
+            yield
+        finally:
+            stop.set()
+            thread.join(timeout=1)
+
     def _run_command(self, cmd: str, timeout: int = BUILD_TIMEOUT) -> Tuple[bool, str]:
         """
             Run a west command, streaming its output to the build log. On timeout the
@@ -259,7 +295,7 @@ class SampleBuilder:
         timer.start()
 
         lines = []
-        with open(self.log_file, "a", buffering=1) as logf:
+        with self._heartbeat(), open(self.log_file, "a", buffering=1) as logf:
             for line in proc.stdout:
                 logf.write(line)
                 lines.append(line)
