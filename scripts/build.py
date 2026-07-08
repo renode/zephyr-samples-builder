@@ -5,9 +5,12 @@ import json
 import math
 import os
 import re
+import shlex
 import shutil
+import signal
 import subprocess
 import tempfile
+import threading
 import time
 import yaml
 import contextlib
@@ -40,6 +43,9 @@ templateLoader = jinja2.FileSystemLoader(searchpath="./")
 templateEnv = jinja2.Environment(loader=templateLoader)
 
 dts_overlay_template = templateEnv.get_template('templates/overlay.dts')
+
+# Per-`west` command timeout; a hung build (e.g. runaway IREE/cc1plus) is killed and recorded as a failure so the run continues
+BUILD_TIMEOUT = int(os.environ.get("BUILD_TIMEOUT", "1200"))        # 20 min
 
 
 @contextlib.contextmanager
@@ -233,31 +239,39 @@ class SampleBuilder:
             print(f"Preserving original DTS file at {dts_original_path}")
             shutil.copyfile(dts_original_path, self.dts_original)
 
-    def _run_command(self, cmd: str) -> Tuple[bool, str]:
+    def _run_command(self, cmd: str, timeout: int = BUILD_TIMEOUT) -> Tuple[bool, str]:
         """
-            Runs a specified west command.
-
-            Parameters:
-            cmd (str): The west command to be run.
-
-            Returns:
-            bool: True if the command failed, False otherwise.
-            str: The output from the executed command.
+            Run a west command, streaming its output to the build log. On timeout the
+            whole process group is killed (west spawns cmake/ninja/gcc/cc1plus) and the
+            command is reported as failed. Returns (failed, output).
         """
-        failed = False
-        output = ""
+        proc = subprocess.Popen(
+            shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            text=True, errors="replace", start_new_session=True,
+        )
+        timed_out = threading.Event()
 
-        try:
-            output = subprocess.check_output((cmd.split(" ")), stderr=subprocess.STDOUT).decode()
-        except subprocess.CalledProcessError as error:
-            failed = True
-            output = error.output.decode()
+        def kill_group():
+            timed_out.set()
+            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
 
-        if self.log_file is not None:
-            with open(self.log_file, 'a') as file:
-                file.write(output)
+        timer = threading.Timer(timeout, kill_group)
+        timer.start()
 
-        return (failed, output)
+        lines = []
+        with open(self.log_file, "a", buffering=1) as logf:
+            for line in proc.stdout:
+                logf.write(line)
+                lines.append(line)
+            proc.wait()
+            timer.cancel()
+            if timed_out.is_set():
+                note = f"*** timed out after {timeout}s, process group killed ***\n"
+                logf.write(note)
+                lines.append(note)
+                print(red(f"TIMEOUT after {timeout}s: {self.platform} / {self.sample_name}"))
+
+        return proc.returncode != 0, "".join(lines)
 
     def _build(self, pristine: bool = True, prepare_only: bool = False, disable_overlays: bool = False) -> Tuple[bool, str]:
         """
