@@ -9,6 +9,7 @@ import shlex
 import shutil
 import signal
 import subprocess
+import sys
 import tempfile
 import threading
 import time
@@ -25,7 +26,6 @@ from common import (
     find_node_size,
     decode_node,
     get_sample_path,
-    print_frame,
     zephyr_config_to_list,
     get_versions,
     get_yaml_data,
@@ -776,6 +776,9 @@ def main(board_dir: str, board_name: str, sample_name: str, dry_run: bool = Fals
 
 
 if __name__ == "__main__":
+    # Line-buffer stdout so lines appear live under GNU parallel (a pipe, not a tty).
+    sys.stdout.reconfigure(line_buffering=True)
+
     ap = ArgumentParser()
     ap.add_argument("board_dir")
     ap.add_argument("board_name")
@@ -795,10 +798,10 @@ if __name__ == "__main__":
 
     if multijob:
         start_time = time.time()
-        print_frame(f"job {args.job_number} / {args.jobs_total} started")
+        print(f">>> job {args.job_number}/{args.jobs_total} started")
 
     main(board_dir, board_name, sample_name, dry_run)
 
     if multijob:
         total_time = time.time() - start_time
-        print_frame(f"job {args.job_number} / {args.jobs_total} finished in {total_time:.2f}")
+        print(f"<<< job {args.job_number}/{args.jobs_total} finished in {total_time:.2f}s")

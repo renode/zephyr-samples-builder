@@ -44,11 +44,14 @@ Generate a list of targets to build:
 ./scripts/get_boards_samples_pairs.py -c zephyr.yaml > boards_sample_pairs
 ```
 
-Run the sequential build using GNU Parallel:
+Run the build using GNU Parallel:
 
 ```sh
-parallel -j +0 --keep-order --col-sep " " --halt now,fail=1 ./scripts/build.py --config=zephyr.yaml {} -j {#} -J `wc -l < boards_sample_pairs` '::::' boards_sample_pairs
+parallel -j +0 --line-buffer --tagstring '{2}/{3}' --timeout 1500 --joblog parallel-joblog.tsv --col-sep " " ./scripts/build.py --config=zephyr.yaml {} -j {#} -J `wc -l < boards_sample_pairs` '::::' boards_sample_pairs || true
 ```
+
+A build that hangs is killed after `BUILD_TIMEOUT` seconds (default 1200) and recorded
+as a failure so the run continues; `parallel-joblog.tsv` records per-target runtimes.
 
 Or build a single target:
 
