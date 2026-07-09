@@ -387,6 +387,19 @@ class SampleBuilder:
         alternative = alternative_names.get(node_name, node_name)
         return alternative if find_node_size(node_name, dts_filename) is None else node_name
 
+    @staticmethod
+    def _merge_node_sizes(sizes: dict, n_sizes: dict) -> None:
+        """
+        Merge freshly parsed DTS sizes into the running totals.
+        """
+        for k, entry in n_sizes.items():
+            if k not in sizes:
+                sizes[k] = entry
+                continue
+            name, base, sz = sizes[k]
+            _, _, n_sz = entry
+            sizes[k] = (name, base, max(sz, n_sz))
+
     def _prepare_node_entries(self, west_output, dts_filename):
         """
         Prepares memory node entries based on west errors and the DTS file.
@@ -477,12 +490,13 @@ class SampleBuilder:
 
             occurrences = re.findall(self._MEMORY_EXTENSION_REGEX, west_output)
 
+            dts_filename = self.get_artifacts().get("dts", dts_filename)
             n_sizes = self._prepare_node_entries(west_output, dts_filename)
             if not n_sizes:
                 print("Build failed. Size is not the issue. Aborting!")
                 return True
 
-            sizes.update(n_sizes)
+            self._merge_node_sizes(sizes, n_sizes)
 
             if occurrences == []:
                 print(f"Build failed. Attempted node size increases: {sizes}. Aborting!")
