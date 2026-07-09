@@ -95,7 +95,7 @@ def find_node_size(node: str, dts_filename: str):
         dts = f.read()
     try:
         node_name = re.search(r"zephyr,{} = &(\w+);".format(node), dts).group(1)
-        node_size = re.search(r"{}:(.*\n)*?.*reg = <(.*)>;".format(node_name), dts).group(2)
+        node_size = re.search(rf"(?<![\w-]){re.escape(node_name)}:(?:.*?\n)*?[ \t]*reg = <([^>]+)>;", dts,).group(1)
         node_size = node_size.split()
     except AttributeError:
         return None
