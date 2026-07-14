@@ -1,0 +1,148 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Patryk Koscik <pkoscik@antmicro.com>
+Date: Tue, 14 Jul 2026 14:30:00 +0200
+Subject: [PATCH] use zephyr-namespaced generated headers
+
+Zephyr no longer adds include/generated/zephyr to the compiler include
+path. Include version.h and syscall headers via the zephyr/ prefix.
+---
+ abort.c                           | 2 +-
+ mutex-pool/gen-mutex-pool.py      | 2 +-
+ rust-smem.c                       | 2 +-
+ rust/zephyr-sys/wrapper.h         | 2 +-
+ samples/futures/src/main.c        | 2 +-
+ samples/no_std/src/main.c         | 2 +-
+ samples/rust-app/src/main.c       | 2 +-
+ scripts/gen_syscalls.py           | 4 ++--
+ uart-buffered/src/uart_buffered.c | 2 +-
+ uart-buffered/src/uart_buffered.h | 2 +-
+ 10 files changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/abort.c b/abort.c
+index b3beeb9..40a0370 100644
+--- a/abort.c
++++ b/abort.c
+@@ -5,7 +5,7 @@
+  */
+ 
+ #include <stdlib.h>
+-#include <version.h>
++#include <zephyr/version.h>
+ #if KERNEL_VERSION_MAJOR < 3
+ #include <zephyr.h>
+ #else
+diff --git a/mutex-pool/gen-mutex-pool.py b/mutex-pool/gen-mutex-pool.py
+index cd68d5c..f0f849d 100755
+--- a/mutex-pool/gen-mutex-pool.py
++++ b/mutex-pool/gen-mutex-pool.py
+@@ -7,7 +7,7 @@ count = int(sys.argv[1])
+ initializer = "\n".join([f'\tZ_MUTEX_INITIALIZER(rust_mutex_pool[{i}]),' for i in range(count)])
+ 
+ sys.stdout.write(f'''
+-#include <version.h>
++#include <zephyr/version.h>
+ #if KERNEL_VERSION_MAJOR < 3
+ #include <kernel.h>
+ #else
+diff --git a/rust-smem.c b/rust-smem.c
+index a8fb7c4..553b504 100644
+--- a/rust-smem.c
++++ b/rust-smem.c
+@@ -1,4 +1,4 @@
+-#include <version.h>
++#include <zephyr/version.h>
+ #if KERNEL_VERSION_MAJOR < 3
+ #include <zephyr.h>
+ #include <init.h>
+diff --git a/rust/zephyr-sys/wrapper.h b/rust/zephyr-sys/wrapper.h
+index 323a92b..5e2d480 100644
+--- a/rust/zephyr-sys/wrapper.h
++++ b/rust/zephyr-sys/wrapper.h
+@@ -13,7 +13,7 @@
+ #define __UINT64_C(c) c##ULL
+ #endif
+ 
+-#include <version.h>
++#include <zephyr/version.h>
+ #if KERNEL_VERSION_MAJOR < 3
+ #include <kernel.h>
+ #include <all_syscalls.h>
+diff --git a/samples/futures/src/main.c b/samples/futures/src/main.c
+index d8c4809..48eb388 100644
+--- a/samples/futures/src/main.c
++++ b/samples/futures/src/main.c
+@@ -1,4 +1,4 @@
+-#include <version.h>
++#include <zephyr/version.h>
+ 
+ #if KERNEL_VERSION_MAJOR < 3
+ #include <zephyr.h>
+diff --git a/samples/no_std/src/main.c b/samples/no_std/src/main.c
+index 74f6fd3..27cffea 100644
+--- a/samples/no_std/src/main.c
++++ b/samples/no_std/src/main.c
+@@ -1,4 +1,4 @@
+-#include <version.h>
++#include <zephyr/version.h>
+ #if KERNEL_VERSION_MAJOR < 3
+ #include <zephyr.h>
+ #else
+diff --git a/samples/rust-app/src/main.c b/samples/rust-app/src/main.c
+index 74f6fd3..27cffea 100644
+--- a/samples/rust-app/src/main.c
++++ b/samples/rust-app/src/main.c
+@@ -1,4 +1,4 @@
+-#include <version.h>
++#include <zephyr/version.h>
+ #if KERNEL_VERSION_MAJOR < 3
+ #include <zephyr.h>
+ #else
+diff --git a/scripts/gen_syscalls.py b/scripts/gen_syscalls.py
+index ec2a137..b455924 100755
+--- a/scripts/gen_syscalls.py
++++ b/scripts/gen_syscalls.py
+@@ -161,7 +161,7 @@ def main():
+     with open(args.all_syscalls, "w") as fp:
+         fp.write("#ifndef ZEPHYR_ALL_SYSCALLS_H\n")
+         fp.write("#define ZEPHYR_ALL_SYSCALLS_H\n")
+-        fp.write("#include <version.h>\n")
++        fp.write("#include <zephyr/version.h>\n")
+         fp.write("#if KERNEL_VERSION_MAJOR < 3\n")
+         fp.write("\n".join(["#include <%s>" % fn for fn in includes]))
+         fp.write("\n#else\n")
+@@ -170,7 +170,7 @@ def main():
+         fp.write("\n")
+         # Hack because z_sys_mutex_kernel_lock is not defined in sys/mutex.h for !USERSPACE
+         # This is the same on all zephyr versions as it exists in include/generated
+-        fp.write("#include <syscalls/mutex.h>\n")
++        fp.write("#include <zephyr/syscalls/mutex.h>\n")
+         fp.write("#include <time.h>\n")
+         fp.write("\n")
+         fp.write("".join(declarations))
+diff --git a/uart-buffered/src/uart_buffered.c b/uart-buffered/src/uart_buffered.c
+index 051f5f2..2d17ddb 100644
+--- a/uart-buffered/src/uart_buffered.c
++++ b/uart-buffered/src/uart_buffered.c
+@@ -1,6 +1,6 @@
+ #define __ZEPHYR_SUPERVISOR__
+ 
+-#include <version.h>
++#include <zephyr/version.h>
+ 
+ #if KERNEL_VERSION_MAJOR < 3
+ #include <logging/log.h>
+diff --git a/uart-buffered/src/uart_buffered.h b/uart-buffered/src/uart_buffered.h
+index 7d62b46..87d62ef 100644
+--- a/uart-buffered/src/uart_buffered.h
++++ b/uart-buffered/src/uart_buffered.h
+@@ -1,7 +1,7 @@
+ #ifndef __UART_BUFFERED_H__
+ #define __UART_BUFFERED_H__
+ 
+-#include <version.h>
++#include <zephyr/version.h>
+ #if KERNEL_VERSION_MAJOR < 3
+ #include <zephyr.h>
+ #include <kernel.h>
+-- 
+2.44.0

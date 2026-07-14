@@ -1,0 +1,54 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Patryk Koscik <pkoscik@antmicro.com>
+Date: Tue, 14 Jul 2026 14:30:00 +0200
+Subject: [PATCH] use zephyr-namespaced generated headers
+
+Zephyr no longer adds include/generated/zephyr to the compiler include
+path. Include autoconf.h and version.h via the zephyr/ prefix instead.
+---
+ ports/zephyr/modusocket.c           | 2 +-
+ ports/zephyr/mpconfigport.h         | 2 +-
+ ports/zephyr/mpconfigport_minimal.h | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/ports/zephyr/modusocket.c b/ports/zephyr/modusocket.c
+index d06063d..b1bd875 100644
+--- a/ports/zephyr/modusocket.c
++++ b/ports/zephyr/modusocket.c
+@@ -33,7 +33,7 @@
+ #include <stdio.h>
+ #include <zephyr/kernel.h>
+ // Zephyr's generated version header
+-#include <version.h>
++#include <zephyr/version.h>
+ #include <zephyr/net/net_context.h>
+ #include <zephyr/net/net_pkt.h>
+ #include <zephyr/net/dns_resolve.h>
+diff --git a/ports/zephyr/mpconfigport.h b/ports/zephyr/mpconfigport.h
+index 12302a1..0cc2331 100644
+--- a/ports/zephyr/mpconfigport.h
++++ b/ports/zephyr/mpconfigport.h
+@@ -26,7 +26,7 @@
+ #include <alloca.h>
+ 
+ // Include Zephyr's autoconf.h, which should be made first by Zephyr makefiles
+-#include "autoconf.h"
++#include <zephyr/autoconf.h>
+ // Included here to get basic Zephyr environment (macros, etc.)
+ #include <zephyr/kernel.h>
+ #include <zephyr/drivers/spi.h>
+diff --git a/ports/zephyr/mpconfigport_minimal.h b/ports/zephyr/mpconfigport_minimal.h
+index bb28441..b124da8 100644
+--- a/ports/zephyr/mpconfigport_minimal.h
++++ b/ports/zephyr/mpconfigport_minimal.h
+@@ -26,7 +26,7 @@
+ #include <alloca.h>
+ 
+ // Include Zephyr's autoconf.h, which should be made first by Zephyr makefiles
+-#include "autoconf.h"
++#include <zephyr/autoconf.h>
+ // Included here to get basic Zephyr environment (macros, etc.)
+ #include <zephyr/kernel.h>
+ 
+-- 
+2.44.0
