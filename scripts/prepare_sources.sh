@@ -19,7 +19,7 @@ cd zephyrproject/zephyr
 git init > /dev/null 2> /dev/null
 git remote add origin https://github.com/zephyrproject-rtos/zephyr
 git pull --depth 1 origin ${ZEPHYR_VERSION} > /dev/null 2> /dev/null
-git am ../../patches/zephyr/*.patch
+git apply ../../patches/zephyr/*.patch
 
 # Prepare zephyr-rust application
 mkdir -p zephyr-rust
