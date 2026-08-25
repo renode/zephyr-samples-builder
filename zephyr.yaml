@@ -47,11 +47,6 @@ samples:
   posix_eventfd:
     name: "POSIX: eventfd"
     path: "samples/subsys/portability/posix/eventfd/"
-  rust-app:
-    name: "Rust app"
-    path: "samples/../zephyr-rust/samples/rust-app"
-    kconfig:
-      - 'CONFIG_USERSPACE=y'
   zephyr-lang-rust-hello-world:
     name: "Rust Hello World"
     path: "../modules/lang/rust/samples/hello_world"

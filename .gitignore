@@ -6,4 +6,3 @@ zephyrproject/
 artifacts
 build/
 .venv/
-zephyr_rust/
