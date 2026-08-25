@@ -50,6 +50,12 @@ samples:
   zephyr-lang-rust-hello-world:
     name: "Rust Hello World"
     path: "../modules/lang/rust/samples/hello_world"
+  zephyr-lang-rust-bench:
+    name: "Rust Bench"
+    path: "../modules/lang/rust/samples/bench"
+  zephyr-lang-rust-philosopher-async:
+    name: "Rust Async Philosophers"
+    path: "../modules/lang/rust/samples/async-philosophers"
   # The kenning-zephyr-runtime-{microtvm,tflitemicro,iree} samples
   # use the same source, but are built with different config files
   kenning-zephyr-runtime-microtvm:
