@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Patryk Koscik <pkoscik@antmicro.com>
+Date: Wed, 26 Aug 2026 13:20:00 +0200
+Subject: [PATCH] Give bench a static malloc arena
+
+---
+ samples/bench/prj.conf | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/samples/bench/prj.conf b/samples/bench/prj.conf
+index b6c47c3..31b8adf 100644
+--- a/samples/bench/prj.conf
++++ b/samples/bench/prj.conf
+@@ -4,6 +4,7 @@
+ CONFIG_RUST=y
+ CONFIG_RUST_ALLOC=y
+ CONFIG_MAIN_STACK_SIZE=8192
++CONFIG_COMMON_LIBC_MALLOC_ARENA_SIZE=16384
+ 
+ CONFIG_POLL=y
+ 
+-- 
+2.54.0
