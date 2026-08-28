@@ -605,15 +605,6 @@ def get_board_yaml_path_by_identifier(board_dir: str, board_name: str) -> str:
     raise YAMLNotFoundException
 
 
-def get_board_yaml_path(board_dir, board_name):
-    yamlpath = f'{board_dir}/{board_name}.yaml'
-
-    if not os.path.exists(yamlpath):
-        raise Exception(f"Could not find a YAML file for the board '{board_name}': {yamlpath}")
-
-    return yamlpath
-
-
 def get_board_socs_hwmv2(board_yml, board_name):
     if 'board' in board_yml:
         # single board schema

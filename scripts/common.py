@@ -117,23 +117,6 @@ def decode_node(node_name, dts_filename):
         return (node_name, node_size, None)
 
 
-def flatten(boards: dict):
-    """
-    Flatten nested architecture-based board dictionary.
-
-    Args:
-        boards (dict): Dictionary of board lists categorized by architecture.
-
-    Returns:
-        dict: Flattened dictionary with board names as keys and objects as values.
-    """
-    flat_boards = {}
-    for arch in boards:
-        for board in boards[arch]:
-            flat_boards[board.name] = board
-    return flat_boards
-
-
 def create_zip_archive(zip_filename: str, format_args: dict, files: list) -> None:
     """
     Create a zip archive containing specified files based on the given format arguments.
@@ -154,19 +137,6 @@ def create_zip_archive(zip_filename: str, format_args: dict, files: list) -> Non
                 raise ValueError(f"No {ftype} key in artifacts. Path unknown")
             if os.path.exists(fname):
                 f.write(fname, fname.split(os.sep)[1] + os.sep + os.path.basename(fname))
-
-
-def print_frame(text: str, width: int = 80) -> None:
-    """
-    Print the given text within a frame of equal signs.
-
-    Parameters:
-        text (str): The text to be printed within the frame
-        width (int, optional): The width of the frame. Defaults to 80
-    """
-    print("\n" + width * "=")
-    print(text)
-    print(width * "=" + "\n")
 
 
 def calculate_md5(filename: str) -> str:
