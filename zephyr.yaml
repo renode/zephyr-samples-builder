@@ -32,7 +32,7 @@ samples:
     path: "samples/modules/tflite-micro/hello_world"
   micropython:
     name: "MicroPython"
-    path: "samples/../../../micropython/ports/zephyr"
+    path: "../../micropython/ports/zephyr"
   blinky:
     name: "Blinky"
     path: "samples/basic/blinky"
