@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import csv
 import os
 import re
 import json
@@ -250,28 +249,6 @@ def report_vendor_issues(aggregated_results: list):
     print()
 
 
-def minimal_csv_result(aggregated_results: list):
-    return [[
-        elem['platform'],
-        elem['sample_name'],
-        1 if elem['success'] else 0,
-        1 if elem['extended_memory'] else 0
-    ] for elem in aggregated_results]
-
-
-def board_info_csv(collective_result):
-    # use a dictionary in order not to duplicate entries about the same platform
-    boards = {}
-    for platform, data in collective_result.items():
-        boards[platform] = [
-            data['name'],
-            data['soc'],
-            data['arch'],
-            data['arch_bits'],
-        ]
-    return [[key, *val] for key, val in boards.items()]
-
-
 def main(args):
     if args.join_partial_build_results:
         summary_data = aggregate_json_files(args.data_dir, args.file_pattern)
@@ -285,7 +262,7 @@ def main(args):
             summary_data = collective_result(summary_data)
         print(json.dumps(summary_data))
 
-    if args.print_table or args.print_stats or args.generate_csv:
+    if args.print_table or args.print_stats:
         summary_data = aggregate_json_files(args.data_dir, args.file_pattern)
         report_vendor_issues(summary_data)
         # Data for markdown table
@@ -293,15 +270,6 @@ def main(args):
 
         if args.print_stats:
             print(stats)
-
-        if args.generate_csv:
-            with open('build/result.csv', 'w') as res_csv:
-                writer = csv.writer(res_csv)
-                writer.writerows(minimal_csv_result(summary_data))
-
-            with open('build/boards.csv', 'w') as boards_csv:
-                writer = csv.writer(boards_csv)
-                writer.writerows(board_info_csv(collective_result(summary_data)))
 
         if args.print_table:
             # Render the table
@@ -346,19 +314,15 @@ if __name__ == "__main__":
     )
     ap.add_argument(
         "--print-table",
-        action="store",
+        action="store_true",
+        default=False,
         help="Print a table with the build summary",
     )
     ap.add_argument(
         "--print-stats",
-        action="store",
-        help="Print a summary data",
-    )
-    ap.add_argument(
-        "--generate-csv",
         action="store_true",
         default=False,
-        help="Save boards and results CSV files",
+        help="Print a summary data",
     )
     args, _ = ap.parse_known_args()
     main(args)
