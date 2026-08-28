@@ -323,7 +323,7 @@ if __name__ == "__main__":
     ap.add_argument(
         "--file-pattern",
         action="store",
-        default=".+\.json",
+        default=r".+\.json",
         help="Operate on files matching the provided pattern"
     )
     ap.add_argument(
