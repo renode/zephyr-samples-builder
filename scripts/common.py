@@ -3,7 +3,6 @@
 import re
 import os
 import yaml
-import zipfile
 import hashlib
 from colorama import Fore, Style
 import config
@@ -115,28 +114,6 @@ def decode_node(node_name, dts_filename):
         return (node_name, node_base, node_size)
     else:
         return (node_name, node_size, None)
-
-
-def create_zip_archive(zip_filename: str, format_args: dict, files: list) -> None:
-    """
-    Create a zip archive containing specified files based on the given format arguments.
-
-    Parameters:
-        zip_filename (str): The name of the zip archive to be created
-        format_args (dict): A dictionary of format arguments for building file paths
-        files (list): A list of artifacts to include in the zip archive
-
-    Raises:
-        ValueError: If a key specified in 'files' does not occur in 'config.artifact_paths'
-    """
-    with zipfile.ZipFile(zip_filename, "w", compression=zipfile.ZIP_DEFLATED) as f:
-        for ftype in files:
-            if ftype in config.artifact_paths.keys():
-                fname = config.artifact_paths[ftype].format(**format_args)
-            else:
-                raise ValueError(f"No {ftype} key in artifacts. Path unknown")
-            if os.path.exists(fname):
-                f.write(fname, fname.split(os.sep)[1] + os.sep + os.path.basename(fname))
 
 
 def calculate_md5(filename: str) -> str:

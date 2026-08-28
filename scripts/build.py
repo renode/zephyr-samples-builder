@@ -14,6 +14,7 @@ import tempfile
 import threading
 import time
 import yaml
+import zipfile
 import contextlib
 from typing import Tuple
 from argparse import ArgumentParser
@@ -22,7 +23,6 @@ from common import (
     bold,
     green,
     red,
-    create_zip_archive,
     find_node_size,
     decode_node,
     get_sample_path,
@@ -670,10 +670,7 @@ def main(board_dir: str, board_name: str, sample_name: str, dry_run: bool = Fals
         shutil.copyfile(run.dts_original, f"build/{project_sample_name}/{sample_name}.dts.orig")
 
     for key, path in artifacts.items():
-        if re.search("spdx.+", key):
-            filename = os.path.basename(path)
-            shutil.copyfile(path, f"build/{project_sample_name}/{sample_name}-{filename}")
-        elif key == "elf":
+        if key == "elf":
             shutil.copyfile(path, f"build/{project_sample_name}/{sample_name}.elf")
         elif key == "dts":
             shutil.copyfile(path, f"build/{project_sample_name}/{sample_name}.dts")
@@ -777,7 +774,14 @@ def main(board_dir: str, board_name: str, sample_name: str, dry_run: bool = Fals
 
         # Create ZIP archive with sboms
         sbom_zip_name = config.artifact_paths["zip-sbom"].format(**format_args)
-        create_zip_archive(sbom_zip_name, format_args, files=["sbom-app", "sbom-zephyr", "sbom-build"])
+        spdx = [
+            (path, f"{board_name_sanitized}/{sample_name}-{os.path.basename(path)}")
+            for key, path in artifacts.items() if key.startswith("spdx")
+        ]
+        if spdx:
+            with zipfile.ZipFile(sbom_zip_name, "w", compression=zipfile.ZIP_DEFLATED) as z:
+                for src, arcname in spdx:
+                    z.write(src, arcname)
 
 
 if __name__ == "__main__":

@@ -11,9 +11,6 @@ artifact_names:
   elf:         "{sample_name}.elf"
   bin:         "{sample_name}.bin"
   elf-md5:     "{sample_name}.elf.md5"
-  sbom-app:    "{sample_name}-app.spdx"
-  sbom-build:  "{sample_name}-build.spdx"
-  sbom-zephyr: "{sample_name}-zephyr.spdx"
   zip-sbom:    "{sample_name}-sbom.zip"
   result:      "{sample_name}-result.json"
 

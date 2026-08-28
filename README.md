@@ -68,12 +68,8 @@ Artifacts generated during the build process:
 * `dts`: Platform's flattened Device Tree Source file.
 * `config`: Additional Kconfig options used for the build.
 * `build-log`: West build output and errors log.
-* SPDX files:
-  - `sbom-app`: SPDX for app source.
-  - `sbom-build`: SPDX for build environment.
-  - `sbom-zephyr`: SPDX for Zephyr components.
 * ZIP files:
-  - `zip-sbom`: ZIP archive of all SBOM files.
+  - `zip-sbom`: ZIP archive of SPDX SBOM files (app, build, zephyr).
 * JSON files:
   - `result`: Build outcome JSON file.
 
