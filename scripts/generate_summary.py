@@ -119,13 +119,11 @@ def process_sample_data(aggregated_jsons: list) -> dict:
     return sample_dict
 
 
-def collective_result(aggregated_results: list):
+def duplicated_board_names(aggregated_results: list) -> set:
     """
-    Process aggregated build result into a single dict organized by board names.
+    Full names shared by more than one board, counted over a single sample so that
+    each board contributes exactly once.
     """
-    collective = dict()
-
-    # Find duplicated board names.
     names = set()
     duplicates = set()
     first_sample_name = next(iter(config.samples))
@@ -136,7 +134,16 @@ def collective_result(aggregated_results: list):
         if name in names:
             duplicates.add(name)
         names.add(name)
-    del names
+    return duplicates
+
+
+def collective_result(aggregated_results: list):
+    """
+    Process aggregated build result into a single dict organized by board names.
+    """
+    collective = dict()
+
+    duplicates = duplicated_board_names(aggregated_results)
 
     for result in aggregated_results:
         sample_name = result["sample_name"]
@@ -173,18 +180,7 @@ def collective_result_aggregating_revisions_and_variants(aggregated_results: lis
     """
     collective = dict()
 
-    # Find duplicated board names.
-    names = set()
-    duplicates = set()
-    first_sample_name = next(iter(config.samples))
-    for result in aggregated_results:
-        if result["sample_name"] != first_sample_name:
-            continue
-        name = result["platform_full_name"]
-        if name in names:
-            duplicates.add(name)
-        names.add(name)
-    del names
+    duplicates = duplicated_board_names(aggregated_results)
 
     for result in aggregated_results:
         sample_name = result["sample_name"]
