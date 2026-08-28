@@ -50,7 +50,7 @@ west zephyr-export
 cd ..
 
 pushd zephyrproject/modules/lang/rust
-git am ../../../../patches/zephyr-lang-rust/**.patch
+git am ../../../../patches/zephyr-lang-rust/*.patch
 popd
 
 # Prepare Kenning Zephyr Runtime Demo application
