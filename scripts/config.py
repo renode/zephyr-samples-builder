@@ -10,7 +10,6 @@ _project_name = ""
 _project_git_tree = ""
 _project_path = ""
 _samples = {}
-_custom_samples = {}
 _artifact_names = {}
 _artifact_paths = {}
 _artifact_prefix = ""
