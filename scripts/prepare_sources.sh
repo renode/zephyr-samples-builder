@@ -43,7 +43,7 @@ west config manifest.group-filter -- +ci,+optional
 for i in $(seq 1 5)
 do
     echo try $i of 5
-    west update >> /dev/null 2>&1 && break || sleep 5;
+    west update -o=--depth=1 -o=--no-tags -n >> /dev/null 2>&1 && break || sleep 5;
 done
 
 west zephyr-export
