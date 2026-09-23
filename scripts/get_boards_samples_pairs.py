@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 import yaml
 import config
+from argparse import ArgumentParser
 
 
 def get_yaml_identifiers(directory: str, filter_archs: list | None = None, filter_targets: list | None = None, suppress_output=True) -> dict:
@@ -49,7 +51,30 @@ def get_yaml_identifiers(directory: str, filter_archs: list | None = None, filte
     return all_boards
 
 
-def generate_samples_from_yaml() -> None:
+def get_board_vendor(board_dir: str, board_name: str) -> str | None:
+    """
+    Retrieve the vendor of a board, as declared in its `board.yml`.
+
+    Returns None if the vendor is not declared, in which case the board is not
+    matched against the blacklist and gets built.
+    """
+    with open(f'{board_dir}/board.yml') as f:
+        data = yaml.safe_load(f)
+
+    if 'board' in data:
+        # single board schema
+        return data['board'].get('vendor')
+
+    # multi-board schema with multiple boards
+    sanitized_board = board_name.split('@')[0].split('/')[0]
+    for board in data.get('boards', []):
+        if board['name'] == sanitized_board:
+            return board.get('vendor')
+
+    return None
+
+
+def generate_samples_from_yaml(blacklisted_vendors: set) -> None:
     """
     Generate combinations of boards and samples based on configuration file
 
@@ -61,6 +86,11 @@ def generate_samples_from_yaml() -> None:
     directory_path = f'{config.project_path}/boards'
     identifiers = get_yaml_identifiers(directory_path, omit_arch, omit_target)
     for board, dir in identifiers.items():
+        vendor = get_board_vendor(dir, board)
+        if vendor in blacklisted_vendors:
+            print(f"Ignoring blacklisted board: {board} (vendor: {vendor})", file=sys.stderr)
+            continue
+
         for sample, sample_data in config.samples.items():
             sample_boards = sample_data.get("boards", [board])
             if board in sample_boards:
@@ -68,5 +98,14 @@ def generate_samples_from_yaml() -> None:
 
 
 if __name__ == "__main__":
+    ap = ArgumentParser()
+    ap.add_argument("--vendor-blacklist", help="File listing vendors to skip, one per line")
+    args, _ = ap.parse_known_args()
+
+    blacklisted_vendors = set()
+    if args.vendor_blacklist:
+        with open(args.vendor_blacklist) as f:
+            blacklisted_vendors = {line.strip() for line in f if line.strip()}
+
     config.load()
-    generate_samples_from_yaml()
+    generate_samples_from_yaml(blacklisted_vendors)
