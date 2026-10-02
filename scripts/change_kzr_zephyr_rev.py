@@ -6,7 +6,7 @@ import yaml
 p = argparse.ArgumentParser()
 p.add_argument("-f", "--file", required=True)
 p.add_argument("-r", "--revision", required=True)
-p.add_argument("--tflite-micro-revision", default="zephyr-v4.4.0")
+p.add_argument("--tflite-micro-revision", default="zephyr-v4.5.0")
 args = p.parse_args()
 
 with open(args.file) as f:
