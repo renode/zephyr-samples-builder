@@ -44,8 +44,9 @@ templateEnv = jinja2.Environment(loader=templateLoader)
 
 dts_overlay_template = templateEnv.get_template('templates/overlay.dts')
 
-# Per-`west` command timeout; a hung build (e.g. runaway IREE/cc1plus) is killed and recorded as a failure so the run continues
-BUILD_TIMEOUT = int(os.environ.get("BUILD_TIMEOUT", "1200"))        # 20 min
+# Time budget for a whole target (all commands and rebuilds included); a command still
+# running when it is exhausted is killed and the target recorded as a failure
+BUILD_TIMEOUT = int(os.environ.get("BUILD_TIMEOUT", "1500"))        # 25 min
 # Liveness line every N seconds while a command runs (only long builds ever print)
 HEARTBEAT_INTERVAL = int(os.environ.get("BUILD_HEARTBEAT", "300"))  # 5 min
 
@@ -89,6 +90,8 @@ class SampleBuilder:
 
         self.success = False
         self.arch_bits = 32
+        self.start_time = time.monotonic()
+        self.deadline = self.start_time + BUILD_TIMEOUT
 
     # Constants
     ARTIFACTS = {
@@ -275,20 +278,34 @@ class SampleBuilder:
             stop.set()
             thread.join(timeout=1)
 
-    def _run_command(self, cmd: str, timeout: int = BUILD_TIMEOUT) -> Tuple[bool, str]:
+    def _run_command(self, cmd: str) -> Tuple[bool, str]:
         """
-            Run a west command, streaming its output to the build log. On timeout the
-            whole process group is killed (west spawns cmake/ninja/gcc/cc1plus) and the
-            command is reported as failed. Returns (failed, output).
+            Run a west command, writing its output straight to the build log. The whole
+            target shares a BUILD_TIMEOUT time budget; when it is exhausted the running
+            command's process group is killed (west spawns cmake/ninja/gcc/cc1plus) and
+            the command is reported as failed. Commands started after the budget lapses
+            are not executed at all. Returns (failed, output).
         """
+        remaining = self.deadline - time.monotonic()
+
+        if remaining <= 0:
+            elapsed = time.monotonic() - self.start_time
+            note = (f"*** timed out: target budget of {BUILD_TIMEOUT}s exhausted after "
+                    f"{elapsed:.1f}s, command not started: {cmd} ***\n")
+            with open(self.log_file, "a") as logf:
+                logf.write(note)
+            print(red(f"TIMEOUT after {BUILD_TIMEOUT}s: {self.platform} / {self.sample_name}"))
+            return True, note
+
         start = os.path.getsize(self.log_file)
+        cmd_start = time.monotonic()
         timed_out = False
         with self._heartbeat(), open(self.log_file, "a") as logf:
             proc = subprocess.Popen(
                 shlex.split(cmd), stdout=logf, stderr=subprocess.STDOUT, start_new_session=True,
             )
             try:
-                proc.wait(timeout=timeout)
+                proc.wait(timeout=max(0, remaining))
             except subprocess.TimeoutExpired:
                 timed_out = True
             finally:
@@ -296,8 +313,15 @@ class SampleBuilder:
                     os.killpg(proc.pid, signal.SIGKILL)
                     proc.wait()
             if timed_out:
-                logf.write(f"*** timed out after {timeout}s, process group killed ***\n")
-                print(red(f"TIMEOUT after {timeout}s: {self.platform} / {self.sample_name}"))
+                now = time.monotonic()
+                elapsed = now - self.start_time
+                command_elapsed = now - cmd_start
+                logf.write(
+                    f"*** timed out: target budget of {BUILD_TIMEOUT}s exhausted after "
+                    f"{elapsed:.1f}s, process group killed "
+                    f"(command ran {command_elapsed:.1f}s) ***\n",
+                )
+                print(red(f"TIMEOUT after {BUILD_TIMEOUT}s: {self.platform} / {self.sample_name}"))
 
         with open(self.log_file, errors="replace") as f:
             f.seek(start)
