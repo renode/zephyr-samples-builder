@@ -47,7 +47,7 @@ Generate a list of targets to build:
 Run the build using GNU Parallel:
 
 ```sh
-parallel -j +0 --line-buffer --tagstring '{=2 $t = sprintf("%-44.44s", $arg[2]."/".$arg[3]); $n = 0; $n += ord for split //, $t; $_ = "\033[".(91 + $n % 6)."m".$t."\033[0m"; =}' --timeout 1500 --joblog parallel-joblog.tsv --col-sep " " ./scripts/build.py --config=zephyr.yaml {} -j {#} -J `wc -l < boards_sample_pairs` '::::' boards_sample_pairs || true
+parallel -j +0 --line-buffer --tagstring '{=2 $t = sprintf("%-44.44s", $arg[2]."/".$arg[3]); $n = 0; $n += ord for split //, $t; $_ = "\033[".(91 + $n % 6)."m".$t."\033[0m"; =}' --joblog parallel-joblog.tsv --col-sep " " ./scripts/build.py --config=zephyr.yaml {} -j {#} -J `wc -l < boards_sample_pairs` '::::' boards_sample_pairs || true
 ```
 
 A target that takes longer than `BUILD_TIMEOUT` seconds in total (default 1500) is killed and recorded
