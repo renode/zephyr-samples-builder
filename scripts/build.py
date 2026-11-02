@@ -281,33 +281,25 @@ class SampleBuilder:
             whole process group is killed (west spawns cmake/ninja/gcc/cc1plus) and the
             command is reported as failed. Returns (failed, output).
         """
-        proc = subprocess.Popen(
-            shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-            text=True, errors="replace", start_new_session=True,
-        )
-        timed_out = threading.Event()
-
-        def kill_group():
-            timed_out.set()
-            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
-
-        timer = threading.Timer(timeout, kill_group)
-        timer.start()
-
-        lines = []
-        with self._heartbeat(), open(self.log_file, "a", buffering=1) as logf:
-            for line in proc.stdout:
-                logf.write(line)
-                lines.append(line)
-            proc.wait()
-            timer.cancel()
-            if timed_out.is_set():
-                note = f"*** timed out after {timeout}s, process group killed ***\n"
-                logf.write(note)
-                lines.append(note)
+        start = os.path.getsize(self.log_file)
+        timed_out = False
+        with self._heartbeat(), open(self.log_file, "a") as logf:
+            proc = subprocess.Popen(
+                shlex.split(cmd), stdout=logf, stderr=subprocess.STDOUT, start_new_session=True,
+            )
+            try:
+                proc.wait(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                timed_out = True
+                os.killpg(proc.pid, signal.SIGKILL)
+                proc.wait()
+            if timed_out:
+                logf.write(f"*** timed out after {timeout}s, process group killed ***\n")
                 print(red(f"TIMEOUT after {timeout}s: {self.platform} / {self.sample_name}"))
 
-        return proc.returncode != 0, "".join(lines)
+        with open(self.log_file, errors="replace") as f:
+            f.seek(start)
+            return proc.returncode != 0 or timed_out, f.read()
 
     def _build(self, pristine: bool = True, prepare_only: bool = False, disable_overlays: bool = False) -> Tuple[bool, str]:
         """
