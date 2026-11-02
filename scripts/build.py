@@ -291,8 +291,10 @@ class SampleBuilder:
                 proc.wait(timeout=timeout)
             except subprocess.TimeoutExpired:
                 timed_out = True
-                os.killpg(proc.pid, signal.SIGKILL)
-                proc.wait()
+            finally:
+                if proc.poll() is None:
+                    os.killpg(proc.pid, signal.SIGKILL)
+                    proc.wait()
             if timed_out:
                 logf.write(f"*** timed out after {timeout}s, process group killed ***\n")
                 print(red(f"TIMEOUT after {timeout}s: {self.platform} / {self.sample_name}"))
