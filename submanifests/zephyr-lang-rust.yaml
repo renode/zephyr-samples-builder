@@ -1,0 +1,6 @@
+manifest:
+  projects:
+    - name: zephyr-lang-rust
+      url: https://github.com/zephyrproject-rtos/zephyr-lang-rust
+      revision: main
+      path: modules/lang/rust
